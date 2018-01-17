@@ -1,0 +1,88 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This is a CMPaaS Project backend api server. You can find out more about CMPaaS at [http://cmpaas.inf.ufes.br](http://cmpaas.inf.ufes.br).",
+    "version": "0.0.1",
+    "title": "CMPaaS Project API's",
+    "termsOfService": "http://cmpaas.inf.ufes.br/terms/",
+    "contact": {
+      "email": "wagner.perin@ufes.br"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "host": "localhost:3000",
+  "basePath": "/v1",
+  "tags": [
+    {
+      "name": "users",
+      "description": "Everything about users",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://cmaas.inf.ufes.br"
+      }
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/users": {
+      "post": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Create a new user",
+        "description": "",
+        "operationId": "createUser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "User object to register in CMPaaS",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Find out more about CMPaaS Project",
+    "url": "http://cmpaas.inf.ufes.br"
+  }
+}
