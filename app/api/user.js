@@ -229,5 +229,11 @@ module.exports = app => {
             });
     };
 
+    api.myUser = (req, res) => {
+        userModel
+            .findById(req.auth.user._id)
+            .then(user => res.json(user), error => res.status(500).json(errorParser.parse('users-1', error)));
+    };
+
     return api;
 }
