@@ -8,14 +8,14 @@ declare var $: any;
 })
 
 export class SweetAlertComponent {
-    showSwal(type) {
-        if (type === 'basic') {
+    showSwal(obj:Object) {
+        if (obj['type'] === 'basic') {
             swal({
                 title: 'Here is a message!',
                 buttonsStyling: false,
                 confirmButtonClass: 'btn btn-success'
             }).catch(swal.noop);
-        } else if (type === 'title-and-text') {
+        } else if (obj['type'] === 'title-and-text') {
             swal({
                 title: 'Here is a message!',
                 text: 'It is pretty, is not it?',
@@ -23,17 +23,17 @@ export class SweetAlertComponent {
                 confirmButtonClass: 'btn btn-info'
             }).catch(swal.noop);
 
-        } else if (type === 'success-message') {
+        } else if (obj['type'] === 'success-message') {
             swal({
                 type: 'success',
-                title: 'Good job!',
-                text: 'You clicked the button!',
+                title: obj['title'],
+                text: obj['text'],
                 buttonsStyling: false,
                 confirmButtonClass: 'btn btn-success'
 
             }).catch(swal.noop);
 
-        } else if (type === 'warning-message-and-confirmation') {
+        } else if (obj['type'] === 'warning-message-and-confirmation') {
             swal({
                     title: 'Are you sure?',
                     text: 'You will not be able to revert this!',
@@ -52,7 +52,7 @@ export class SweetAlertComponent {
                     buttonsStyling: false
                 });
                 }).catch(swal.noop);
-            } else if (type === 'warning-message-and-cancel') {
+            } else if (obj['type'] === 'warning-message-and-cancel') {
             swal({
                     title: 'Are you sure?',
                     text: 'You will not be able to recover this imaginary file!',
@@ -83,7 +83,7 @@ export class SweetAlertComponent {
                   });
                   }
               }).catch(swal.noop);
-          } else if (type === 'custom-html') {
+          } else if (obj['type'] === 'custom-html') {
             swal({
                 title: 'HTML example',
                 buttonsStyling: false,
@@ -94,7 +94,7 @@ export class SweetAlertComponent {
                         'and other HTML tags'
                 }).catch(swal.noop);
 
-            } else if (type === 'auto-close') {
+            } else if (obj['type'] === 'auto-close') {
             swal({  title: 'Auto close alert!',
                     text: 'I will close in 2 seconds.',
                     timer: 2000,
@@ -107,7 +107,7 @@ export class SweetAlertComponent {
                             console.log('I was closed by the timer')
                         }
                 }).catch(swal.noop);
-            } else if (type === 'input-field') {
+            } else if (obj['type'] === 'input-field') {
             swal({
                     title: 'Input something',
                     html: '<div class="form-group">' +
