@@ -8,7 +8,7 @@ export class AuthService {
   // ...
   public isLoggedIn(): boolean {
 
-    const token = sessionStorage.getItem('token');
+    const token = localStorage.getItem('token');
 
     if(!token) return false 
     else return true;
