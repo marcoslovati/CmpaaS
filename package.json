@@ -20,6 +20,7 @@
     "consign": "^0.1.6",
     "express": "^4.16.2",
     "jsonwebtoken": "^8.1.0",
+    "jwt-decode": "^2.2.0",
     "mongoose": "^4.13.7",
     "swagger-ui-express": "^2.0.14"
   },

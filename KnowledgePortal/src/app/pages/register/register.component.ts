@@ -21,6 +21,7 @@ export class RegisterComponent implements OnInit {
     ngOnInit() {
     }
     doRegister(event){
+        event.preventDefault();
         let formObj = this.registerForm.getRawValue(); // {name: '', description: ''}
 
         let serializedForm = JSON.stringify(formObj);

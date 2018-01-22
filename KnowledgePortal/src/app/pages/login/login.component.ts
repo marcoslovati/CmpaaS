@@ -1,4 +1,7 @@
 import { Component, OnInit, ElementRef } from '@angular/core';
+import { Validators, FormBuilder } from "@angular/forms";
+import { Http, Headers } from "@angular/http";
+import { Router } from "@angular/router";
 
 declare var $: any;
 
@@ -8,15 +11,19 @@ declare var $: any;
 })
 
 export class LoginComponent implements OnInit {
+
+    public loginForm = this.fb.group({
+        username: ["", Validators.required],
+        password: ["", Validators.required]
+    });
+    constructor(public fb: FormBuilder, public http: Http, public router: Router, private element: ElementRef){
+        this.nativeElement = element.nativeElement;
+        this.sidebarVisible = false;
+    }
     test: Date = new Date();
     private toggleButton: any;
     private sidebarVisible: boolean;
     private nativeElement: Node;
-
-    constructor(private element: ElementRef) {
-        this.nativeElement = element.nativeElement;
-        this.sidebarVisible = false;
-    }
 
     ngOnInit() {
         var navbar : HTMLElement = this.element.nativeElement;
@@ -42,5 +49,24 @@ export class LoginComponent implements OnInit {
             this.sidebarVisible = false;
             body.classList.remove('nav-open');
         }
+    }
+    doLogin(event) {
+        event.preventDefault();
+        let formObj = this.loginForm.getRawValue(); // {name: '', description: ''}
+
+        let serializedForm = JSON.stringify(formObj);
+
+        var headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+
+        this.http.post("http://localhost:3000/v1/auth", serializedForm, {headers})
+            .subscribe(
+                data => {
+                    localStorage.setItem('token', data.headers.get('x-access-token'));
+                    this.router.navigate(['dashboard']);
+                },
+                error => console.error("couldn't post because", error)
+            );
+
     }
 }
