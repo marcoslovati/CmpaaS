@@ -117,6 +117,14 @@ export class AdminLayoutComponent implements OnInit, AfterViewInit {
             return false;
         }
     }
+    public isEditor() {
+        if (this.location.prepareExternalUrl(this.location.path()) === '/editors/conceptmap') {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
     runOnRouteChange(): void {
       if (window.matchMedia(`(min-width: 960px)`).matches && !this.isMac()) {
         const elemSidebar = <HTMLElement>document.querySelector('.sidebar .sidebar-wrapper');

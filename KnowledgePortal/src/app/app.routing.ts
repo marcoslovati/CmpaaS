@@ -30,6 +30,9 @@ export const AppRoutes: Routes = [
         path: 'maps',
         loadChildren: './maps/maps.module#MapsModule'
     }, {
+        path: 'editors',
+        loadChildren: './editors/editors.module#EditorsModule'
+    },{
         path: 'widgets',
         loadChildren: './widgets/widgets.module#WidgetsModule'
     }, {

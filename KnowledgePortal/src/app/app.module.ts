@@ -45,6 +45,7 @@ import { SidebarModule } from './sidebar/sidebar.module';
 import { FooterModule } from './shared/footer/footer.module';
 import { NavbarModule} from './shared/navbar/navbar.module';
 import { FixedpluginModule} from './shared/fixedplugin/fixedplugin.module';
+import { FormatToolsPluginModule } from './shared/formattoolsplugin/formattoolsplugin.module';
 import { AdminLayoutComponent } from './layouts/admin/admin-layout.component';
 import { AuthLayoutComponent } from './layouts/auth/auth-layout.component';
 
@@ -101,7 +102,8 @@ export class MaterialModule {}
         SidebarModule,
         NavbarModule,
         FooterModule,
-        FixedpluginModule
+        FixedpluginModule,
+        FormatToolsPluginModule
     ],
     declarations: [
         AppComponent,

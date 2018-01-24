@@ -106,6 +106,16 @@ export const ROUTES: RouteInfo[] = [{
             {path: 'lock', title: 'Lock Screen Page', ab:'LSP'},
             {path: 'user', title: 'User Page', ab:'UP'}
         ]
+    },
+    {
+        path: '/editors',
+        title: 'Editors',
+        type: 'sub',
+        icontype: 'dashboard',
+        collapse: 'editors',
+        children: [
+            {path: 'conceptmap', title: 'Concept Map', ab: 'CM'}
+        ]
     }
 ];
 @Component({

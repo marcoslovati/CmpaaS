@@ -10,6 +10,9 @@
         <div *ngIf="!isMap()">
             <app-footer-cmp></app-footer-cmp>
         </div>
+        <div *ngIf="isEditor()">
+            <app-formattoolsplugin></app-formattoolsplugin>
+        </div>
     </div>
-    <app-fixedplugin></app-fixedplugin>
+    <!--<app-fixedplugin></app-fixedplugin>-->
 </div>
