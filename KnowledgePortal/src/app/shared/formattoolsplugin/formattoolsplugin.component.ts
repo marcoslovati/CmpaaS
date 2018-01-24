@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { myDiagram } from '../../editors/conceptmap/conceptmap.component'; 
+import * as go from "gojs";
 
-declare const myDiagram: any;
+
 declare const $: any;
 const md: any = {
     misc: {
@@ -51,9 +53,71 @@ export class FormatToolsPluginComponent implements OnInit {
           }
       });
 
-      $('.fixed-plugin .active-color span').click(function() {
+      $('.fixed-plugin .stroke-color span').click(function() {
          
-          const new_color = $(this).data('color');
+            const color = $(this).data('color');
+            // Always make changes in a transaction, except when initializing the diagram.
+            myDiagram.startTransaction("change color");
+            myDiagram.selection.each(function(node) {
+            if (node instanceof go.Node) {  // ignore any selected Links and simple Parts
+                // Examine and modify the data, not the Node directly.
+                var data = node.data;
+                // Call setDataProperty to support undo/redo as well as
+                // automatically evaluating any relevant bindings.
+                myDiagram.model.setDataProperty(data, "color", color);
+            }
+            });
+            myDiagram.commitTransaction("change color");
+
+      });
+      $('#stroke-color-input').on('change', function() { 
+            // Always make changes in a transaction, except when initializing the diagram.
+            myDiagram.startTransaction("change color");
+            myDiagram.selection.each(function(node) {
+            if (node instanceof go.Node) {  // ignore any selected Links and simple Parts
+                // Examine and modify the data, not the Node directly.
+                var data = node.data;
+                // Call setDataProperty to support undo/redo as well as
+                // automatically evaluating any relevant bindings.
+                myDiagram.model.setDataProperty(data, "color", $('#stroke-color-input').val());
+            }
+            });
+            myDiagram.commitTransaction("change color");
+      } );
+
+      $('.fixed-plugin .border-color span').click(function() {
+         
+            const color = $(this).data('color');
+            // Always make changes in a transaction, except when initializing the diagram.
+            myDiagram.startTransaction("change color");
+            myDiagram.selection.each(function(node) {
+            if (node instanceof go.Node) {  // ignore any selected Links and simple Parts
+                // Examine and modify the data, not the Node directly.
+                var data = node.data;
+                // Call setDataProperty to support undo/redo as well as
+                // automatically evaluating any relevant bindings.
+                myDiagram.model.setDataProperty(data, "border-color", color);
+            }
+            });
+            myDiagram.commitTransaction("change color");
+
+      });
+
+      $('.fixed-plugin .text-color span').click(function() {
+         
+            const color = $(this).data('color');
+            // Always make changes in a transaction, except when initializing the diagram.
+            myDiagram.startTransaction("change color");
+            myDiagram.selection.each(function(node) {
+            if (node instanceof go.Node) {  // ignore any selected Links and simple Parts
+                // Examine and modify the data, not the Node directly.
+                var data = node.data;
+                // Call setDataProperty to support undo/redo as well as
+                // automatically evaluating any relevant bindings.
+                myDiagram.model.setDataProperty(data, "text-color", color);
+            }
+            });
+            myDiagram.commitTransaction("change color");
 
       });
 
