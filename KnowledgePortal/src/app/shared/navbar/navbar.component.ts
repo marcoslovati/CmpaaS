@@ -23,7 +23,7 @@ export class NavbarComponent implements OnInit {
 
     @ViewChild('app-navbar-cmp') button: any;
 
-    constructor(location: Location, private renderer: Renderer, private element: ElementRef) {
+    constructor(location: Location, private renderer: Renderer, private element: ElementRef, private router: Router) {
         this.location = location;
         this.nativeElement = element.nativeElement;
         this.sidebarVisible = false;
@@ -143,5 +143,9 @@ export class NavbarComponent implements OnInit {
     }
     getPath() {
         return this.location.prepareExternalUrl(this.location.path());
+    }
+    logout(){
+        localStorage.removeItem('token');
+        this.router.navigate(['pages/login']);
     }
 }
