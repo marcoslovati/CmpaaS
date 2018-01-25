@@ -91,7 +91,7 @@ export class FormatToolsPluginComponent implements OnInit {
             // Always make changes in a transaction, except when initializing the diagram.
             myDiagram.startTransaction("change color");
             myDiagram.selection.each(function(node) {
-            if (node instanceof go.Node) {  // ignore any selected Links and simple Parts
+            if (node instanceof go.Node || node instanceof go.Link) {  // ignore any selected Links and simple Parts
                 // Examine and modify the data, not the Node directly.
                 var data = node.data;
                 // Call setDataProperty to support undo/redo as well as
@@ -109,7 +109,7 @@ export class FormatToolsPluginComponent implements OnInit {
             // Always make changes in a transaction, except when initializing the diagram.
             myDiagram.startTransaction("change color");
             myDiagram.selection.each(function(node) {
-            if (node instanceof go.Node) {  // ignore any selected Links and simple Parts
+            if (node instanceof go.Node || node instanceof go.Link) {  // ignore any selected Links and simple Parts
                 // Examine and modify the data, not the Node directly.
                 var data = node.data;
                 // Call setDataProperty to support undo/redo as well as

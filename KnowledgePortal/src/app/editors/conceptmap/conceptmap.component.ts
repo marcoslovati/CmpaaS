@@ -234,10 +234,10 @@ export class ConceptMapComponent implements AfterViewInit {
         new go.Binding("curviness"),
         $(go.Shape,  // the link shape
           { stroke: "black" },
-          new go.Binding("stroke", "color").makeTwoWay()),
+          new go.Binding("stroke", "border-color").makeTwoWay()),
         $(go.Shape,  // the arrowhead
           { toArrow: "standard", stroke: null },
-          new go.Binding("fill", "color").makeTwoWay()),
+          new go.Binding("fill", "border-color").makeTwoWay()),
         $(go.Panel, "Auto",
           $(go.Shape,  // the label background, which becomes transparent around the edges
             { fill: $(go.Brush, "Radial", { 0: "rgb(240, 240, 240)", 0.2: "rgb(240, 240, 240)", 1: "rgba(240, 240, 240, 0)" }),
@@ -249,7 +249,8 @@ export class ConceptMapComponent implements AfterViewInit {
               margin: 4,
               editable: true  // allow in-place editing by user
             },
-            new go.Binding("text", "text").makeTwoWay())
+            new go.Binding("text", "text").makeTwoWay(),
+            new go.Binding("stroke", "text-color").makeTwoWay())
         ),
         { // this tooltip Adornment is shared by all links
           toolTip:
