@@ -52,6 +52,8 @@ import { AuthLayoutComponent } from './layouts/auth/auth-layout.component';
 import { AppRoutes } from './app.routing';
 import { AuthGuard } from "app/auth/auth.guard";
 import { AuthService } from "app/auth/auth.service";
+import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
+import { TokenInterceptor } from "app/auth/token.interceptor";
 
 @NgModule({
   exports: [
@@ -103,7 +105,8 @@ export class MaterialModule {}
         NavbarModule,
         FooterModule,
         FixedpluginModule,
-        FormatToolsPluginModule
+        FormatToolsPluginModule,
+        HttpClientModule
     ],
     declarations: [
         AppComponent,
@@ -111,6 +114,10 @@ export class MaterialModule {}
         AuthLayoutComponent
     ],
     bootstrap:    [ AppComponent ],
-    providers: [ AuthGuard, AuthService ]
+    providers: [ AuthGuard, AuthService, {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TokenInterceptor,
+      multi: true
+    } ]
 })
 export class AppModule { }

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import PerfectScrollbar from 'perfect-scrollbar';
-
+import { HttpClient } from "@angular/common/http";
 declare const $: any;
 
 //Metadata
@@ -124,8 +124,9 @@ export const ROUTES: RouteInfo[] = [{
 })
 
 export class SidebarComponent implements OnInit {
+    private user: Object = {};
     public menuItems: any[];
-
+    constructor(public http: HttpClient){}
     isMobileMenu() {
         if ($(window).width() > 991) {
             return false;
@@ -135,6 +136,12 @@ export class SidebarComponent implements OnInit {
 
     ngOnInit() {
         this.menuItems = ROUTES.filter(menuItem => menuItem);
+        //teste
+        this.http.get('http://localhost:3000/v1/users/myuser')
+            .subscribe(
+                data => this.user = data,
+                err => console.log(err)
+            );
     }
     updatePS(): void  {
         if (window.matchMedia(`(min-width: 960px)`).matches && !this.isMac()) {

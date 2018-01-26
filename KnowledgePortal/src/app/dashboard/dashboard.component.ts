@@ -11,6 +11,7 @@ declare const $: any;
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
+
   // constructor(private navbarTitleService: NavbarTitleService, private notificationService: NotificationService) { }
   public tableData: TableData;
   startAnimationForLineChart(chart: any) {
@@ -192,6 +193,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
                   }]
               },
           });
+
+          
    }
    ngAfterViewInit() {
        const breakCards = true;
