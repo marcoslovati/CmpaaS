@@ -21,7 +21,7 @@ var schema = mongoose.Schema({
     author: {
         _id: {
             type: mongoose.Schema.Types.ObjectId, 
-            ref: 'Group'
+            ref: 'User'
         },
         username: {
             type: String
