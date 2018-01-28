@@ -4,6 +4,7 @@ import * as go from "gojs";
 
 
 declare const $: any;
+declare const swal: any;
 const md: any = {
     misc: {
         navbar_menu_visible: 0,
@@ -150,6 +151,29 @@ export class FormatToolsPluginComponent implements OnInit {
             });
             myDiagram.commitTransaction("change text-color");
       } );
+
+      $('#bt-save').click(() => {
+          swal({
+                    title: 'Input something',
+                    html: '<div class="form-group">' +
+                              '<input id="input-field" type="text" class="form-control" />' +
+                          '</div>',
+                    showCancelButton: true,
+                    confirmButtonClass: 'btn btn-success',
+                    cancelButtonClass: 'btn btn-danger',
+                    buttonsStyling: false
+                }).then(function(result) {
+                    swal({
+                        type: 'success',
+                        html: 'You entered: <strong>' +
+                                $('#input-field').val() +
+                              '</strong>',
+                        confirmButtonClass: 'btn btn-success',
+                        buttonsStyling: false
+
+                    });
+                }).catch(swal.noop);
+      });
 
       $('.fixed-plugin .background-color span').click(function() {
           $(this).siblings().removeClass('active');
