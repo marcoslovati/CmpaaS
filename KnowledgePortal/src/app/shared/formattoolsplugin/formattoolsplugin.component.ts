@@ -103,6 +103,21 @@ export class FormatToolsPluginComponent implements OnInit {
 
       });
 
+      $('#border-color-input').on('change', function() { 
+            // Always make changes in a transaction, except when initializing the diagram.
+            myDiagram.startTransaction("change border-color");
+            myDiagram.selection.each(function(node) {
+            if (node instanceof go.Node) {  // ignore any selected Links and simple Parts
+                // Examine and modify the data, not the Node directly.
+                var data = node.data;
+                // Call setDataProperty to support undo/redo as well as
+                // automatically evaluating any relevant bindings.
+                myDiagram.model.setDataProperty(data, "border-color", $('#border-color-input').val());
+            }
+            });
+            myDiagram.commitTransaction("change border-color");
+      } );
+
       $('.fixed-plugin .text-color span').click(function() {
          
             const color = $(this).data('color');
@@ -120,6 +135,21 @@ export class FormatToolsPluginComponent implements OnInit {
             myDiagram.commitTransaction("change color");
 
       });
+
+      $('#text-color-input').on('change', function() { 
+            // Always make changes in a transaction, except when initializing the diagram.
+            myDiagram.startTransaction("change text-color");
+            myDiagram.selection.each(function(node) {
+            if (node instanceof go.Node) {  // ignore any selected Links and simple Parts
+                // Examine and modify the data, not the Node directly.
+                var data = node.data;
+                // Call setDataProperty to support undo/redo as well as
+                // automatically evaluating any relevant bindings.
+                myDiagram.model.setDataProperty(data, "text-color", $('#text-color-input').val());
+            }
+            });
+            myDiagram.commitTransaction("change text-color");
+      } );
 
       $('.fixed-plugin .background-color span').click(function() {
           $(this).siblings().removeClass('active');
