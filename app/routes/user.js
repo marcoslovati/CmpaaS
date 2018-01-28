@@ -10,7 +10,11 @@ module.exports = app => {
         .delete(api.removeAll);
     app
         .route('/v1/users/myuser')
-        .get(authApi.authenticationRequired, api.myUser)
+        .get(authApi.authenticationRequired, api.myUser);
+    
+    app
+        .route('/v1/users/photo')
+        .post(authApi.authenticationRequired, api.photo);
 
     app
         .route('/v1/users/:id')

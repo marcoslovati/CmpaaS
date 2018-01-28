@@ -76,7 +76,10 @@ var schema = mongoose.Schema({
                     type: String
                 }
             }
-    }]
+    }],
+    profilePicture: {
+        type: String
+    }
 }, { usePushEach: true });
 
 schema.methods.comparePassword = function (password) {

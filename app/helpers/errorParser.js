@@ -84,6 +84,14 @@ module.exports = app => {
                     devMessage: 'This resource spect a object in the body request.'
                 };
                 break;
+            case 'users-11':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('userApiErrorsRoute'),
+                    userMessage: 'Internal server error: Error to upload photo',
+                    devMessage: errorObject
+                };
+                break;
             case 'groups-1':
                 error = {
                     errorCode,
