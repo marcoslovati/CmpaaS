@@ -249,7 +249,7 @@ module.exports = app => {
                 error = {
                     errorCode,
                     moreInfo: app.get('mapApiErrorsRoute'),
-                    userMessage: 'Internal server error: ' + errorObject.errmsg,
+                    userMessage: 'Internal server error: ' + errorObject.message,
                     devMessage: errorObject
                 };
                 break;

@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { myDiagram } from '../../editors/conceptmap/conceptmap.component'; 
 import * as go from "gojs";
 
-
 declare const $: any;
 declare const swal: any;
+
 const md: any = {
     misc: {
         navbar_menu_visible: 0,
@@ -20,7 +20,6 @@ const md: any = {
 })
 
 export class FormatToolsPluginComponent implements OnInit {
-
   constructor() { }
 
   ngOnInit() {
@@ -154,24 +153,104 @@ export class FormatToolsPluginComponent implements OnInit {
 
       $('#bt-save').click(() => {
           swal({
-                    title: 'Input something',
-                    html: '<div class="form-group">' +
-                              '<input id="input-field" type="text" class="form-control" />' +
-                          '</div>',
+                    title: 'New Map Data',
+                    html: '<div class="col-md-12">'+
+                         '<form class="form-horizontal">'+
+                            '<div class="row">'+
+                               '<div class="col-sm-12">'+
+                                    '<div class="form-group label-floating is-empty">'+
+                                        '<label class="control-label"></label>'+
+                                        '<input id="map-title" type="text" class="form-control" placeholder="Map Title">'+
+                                        '<span class="help-block">A title will allow you to identify this map on your map list.</span>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>' +
+                            '<div class="row">'+
+                               '<div class="col-sm-12">'+
+                                    '<div class="form-group label-floating is-empty">'+
+                                        '<label class="control-label"></label>'+
+                                        '<input id="map-description" type="text" class="form-control" placeholder="Map Description">'+
+                                        '<span class="help-block">Give more informations about this map.</span>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>' +
+                            '<div class="row">'+
+                               '<div class="col-sm-12">'+
+                                    '<div class="form-group label-floating is-empty">'+
+                                        '<label class="control-label"></label>'+
+                                        '<input id="map-question" type="text" class="form-control" placeholder="Investigation Question">'+
+                                        '<span class="help-block">Wich question this map aims to answer?</span>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>' +
+                            '<div class="row">'+
+                               '<div class="col-sm-12">'+
+                                    '<div class="form-group label-floating is-empty">'+
+                                        '<label class="control-label"></label>'+
+                                        '<input id="map-keywords" type="text" class="form-control" placeholder="Keywords">'+
+                                        '<span class="help-block">Keywords of this map separeted by comma.</span>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>' +
+                            '<div class="row">'+
+                               '<div class="col-sm-12">'+
+                                    '<a href="javascript:void(0)" class="switch-trigger">'+
+                                        'Public'+
+                                        '<div class="togglebutton switch-sidebar-mini">'+
+                                            '<label>'+
+                                                '<input id="map-public" type="checkbox">'+
+                                            '</label>'+
+                                        '</div>'+
+                                    '</a>'+
+                                '</div>'+
+                            '</div>' +
+                        '</form>'+
+                        '</div>',
                     showCancelButton: true,
                     confirmButtonClass: 'btn btn-success',
                     cancelButtonClass: 'btn btn-danger',
                     buttonsStyling: false
                 }).then(function(result) {
-                    swal({
-                        type: 'success',
-                        html: 'You entered: <strong>' +
-                                $('#input-field').val() +
-                              '</strong>',
-                        confirmButtonClass: 'btn btn-success',
-                        buttonsStyling: false
+                    let map:Object = {
+                        title: $('#map-title').val(),
+                        description: $('#map-description').val(),
+                        question: $('#map-question').val(),
+                        keywords: [].concat(($('#map-keywords').val()).replace(/ /g,'').split(",")),
+                        isPublic: $('#map-public').prop('checked')
+                    };
 
+                    $.ajax({
+                        type: 'POST',
+                        contentType: 'application/json',
+                        url: 'http://localhost:3000/v1/maps',
+                        headers: {
+                            "X-Access-Token": localStorage.getItem('token')
+                        },
+                        data: (JSON.stringify(map)).toString()
+                    }).done(function(res) { 
+                        swal({
+                            type: 'success',
+                            html: 'Result: <strong>' +
+                                    res.userMessage +
+                                '</strong>',
+                            confirmButtonClass: 'btn btn-success',
+                            buttonsStyling: false
+
+                        });
+                    }).catch(function(error) {
+                        console.log(error);
+                        swal({
+                            type: 'error',
+                            html: 'Error: <strong>' +
+                                    JSON.parse(error.responseText).userMessage +
+                                '</strong>',
+                            confirmButtonClass: 'btn btn-error',
+                            buttonsStyling: false
+
+                        });
                     });
+                    
+                    
                 }).catch(swal.noop);
       });
 
