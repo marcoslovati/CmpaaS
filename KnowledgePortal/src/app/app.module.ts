@@ -54,6 +54,7 @@ import { AuthGuard } from "app/auth/auth.guard";
 import { AuthService } from "app/auth/auth.service";
 import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
 import { TokenInterceptor } from "app/auth/token.interceptor";
+import { UserService } from "app/_services/user.service";
 
 @NgModule({
   exports: [
@@ -114,7 +115,8 @@ export class MaterialModule {}
         AuthLayoutComponent
     ],
     bootstrap:    [ AppComponent ],
-    providers: [ AuthGuard, AuthService, {
+    providers: [ AuthGuard, AuthService, UserService,
+    {
       provide: HTTP_INTERCEPTORS,
       useClass: TokenInterceptor,
       multi: true

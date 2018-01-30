@@ -3,6 +3,7 @@ import { TableData } from '../md/md-table/md-table.component';
 import { LegendItem, ChartType } from '../md/md-chart/md-chart.component';
 
 import * as Chartist from 'chartist';
+import { HttpClient } from "@angular/common/http";
 
 declare const $: any;
 
@@ -11,7 +12,7 @@ declare const $: any;
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
-
+    constructor(public http:HttpClient) { }
   // constructor(private navbarTitleService: NavbarTitleService, private notificationService: NotificationService) { }
   public tableData: TableData;
   startAnimationForLineChart(chart: any) {
@@ -193,6 +194,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
                   }]
               },
           });
+        
+    
+          this.http.get('http://localhost:3000/v1/myuser/maps')
+            .subscribe(
+                res => console.log(res),
+                error => console.log(error)
+            );
 
           
    }
