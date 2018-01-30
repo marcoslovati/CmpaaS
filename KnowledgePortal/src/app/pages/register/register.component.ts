@@ -24,12 +24,7 @@ export class RegisterComponent implements OnInit {
     doRegister(event){
         event.preventDefault();
         let formObj = this.registerForm.getRawValue(); // {name: '', description: ''}
-
-        //let serializedForm = JSON.stringify(formObj);
-
-        // var headers = new Headers();
-        // headers.append('Content-Type', 'application/json');
-
+        
         this.userService.create(formObj)
             .subscribe(
                 data => {
@@ -48,26 +43,11 @@ export class RegisterComponent implements OnInit {
                         type: 'error',
                         html: 'Oooopppss! <strong>' +
                                 error.error.userMessage +
-                              '</strong>. <br /> You can try again!',
+                              '</strong>. <br /> You can correct it and try again!',
                         confirmButtonClass: 'btn btn-danger',
                         buttonsStyling: false
                     });
                 }
             );
-
-        // this.http.post("http://localhost:3000/v1/users", serializedForm, {headers})
-        //     .subscribe(
-        //         data => {
-        //             let sw = new SweetAlertComponent();
-        //             let msg = {
-        //                 type: "success-message",
-        //                 title: "Success",
-        //                 text: 'User creation successfull.'
-        //             };
-        //             sw.showSwal(msg);
-        //             this.router.navigate(['pages/login']);
-        //         },
-        //         error => console.error("couldn't post because", error)
-        //     );
     }
 }
