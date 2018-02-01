@@ -209,8 +209,16 @@
     .card-signup{
         border-radius: $border-radius-base * 2;
         @include shadow-16dp();
-        margin-bottom: 100px;
-        padding: 40px 0px;
+        margin-bottom: 30px;
+        padding: 20px 0px;
+
+        @include transform-translate-y(0);
+        @extend .animation-transition-general;
+
+        &.card-hidden{
+            opacity: 0;
+            @include transform-translate-y(-60px);
+        }
 
         .info{
             max-width: 360px;
@@ -287,7 +295,7 @@
     .container{
         position: relative;
         z-index: 3;
-        padding-top: 15vh;
+        padding-top: 10vh;
     }
 
     .footer{

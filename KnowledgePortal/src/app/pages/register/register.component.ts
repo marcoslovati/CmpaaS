@@ -3,7 +3,8 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterStateSnapshot } from "@angular/router";
 import { UserService } from "app/_services/user.service";
 
-declare var swal : any;
+declare var swal: any;
+declare var $: any
 
 @Component({
     selector: 'app-register-cmp',
@@ -11,20 +12,35 @@ declare var swal : any;
 })
 
 export class RegisterComponent implements OnInit {
-    public registerForm = this.fb.group({
-        name: ["", Validators.required],
-        email: ["", Validators.required],
-        username: ["", Validators.required],
-        password: ["", Validators.required]
-    });
-    constructor(public fb: FormBuilder, public router: Router, public userService: UserService){}
     test: Date = new Date();
+    registerForm = this.fb.group({
+        name: ["", Validators.compose([Validators.required, Validators.pattern(/^[a-zA-Z\.\'\-]{2,50}(?= [a-zA-Z\.\'\-]{2,50})/)])],
+        email: ["", Validators.compose([Validators.required, Validators.email])],
+        username: ["", Validators.compose([Validators.required, Validators.pattern(/^\S*$/)])],
+        password: ["", Validators.compose([Validators.required, Validators.pattern(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}/)])]
+    });
+
+    constructor(private fb: FormBuilder, private router: Router, private userService: UserService){ }
+    
     ngOnInit() {
+        setTimeout(function() {
+            // after 1000 ms we add the class animated to the login/register card
+            $('.card').removeClass('card-hidden');
+        }, 700);
     }
+
+    termsChange(event) {
+        if(event.target.checked) {
+           $('#bt-register').prop('disabled', false);
+        }else{
+            $('#bt-register').prop('disabled', true);
+        }
+    }
+    
     doRegister(event){
         event.preventDefault();
         let formObj = this.registerForm.getRawValue(); // {name: '', description: ''}
-        
+
         this.userService.create(formObj)
             .subscribe(
                 data => {

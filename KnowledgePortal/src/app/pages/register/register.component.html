@@ -8,7 +8,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/#/dashboard">MD Pro Angular</a>
+                <a class="navbar-brand" href="/#/dashboard">Knowledge Portal | CMPaaS Project</a>
             </div>
             <div class="collapse navbar-collapse" id="menu-example">
                 <ul class="nav navbar-nav navbar-right">
@@ -27,11 +27,11 @@
                             <i class="material-icons">fingerprint</i> Login
                         </a>
                     </li>
-                    <li class="">
+                    <!--<li class="">
                         <a href="/pages/lock">
                             <i class="material-icons">lock_open</i> Lock
                         </a>
-                    </li>
+                    </li>-->
                 </ul>
             </div>
         </div>
@@ -40,19 +40,19 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-10 col-md-offset-1">
-                    <div class="card card-signup">
+                    <div class="card card-signup card-hidden">
                         <h2 class="card-title text-center">Register</h2>
                         <div class="row">
                             <div class="col-md-5 col-md-offset-1">
                                 <div class="card-content">
                                     <div class="info info-horizontal">
                                         <div class="icon icon-rose">
-                                            <i class="material-icons">timeline</i>
+                                            <i class="material-icons">cloud_queue</i>
                                         </div>
                                         <div class="description">
-                                            <h4 class="info-title">Marketing</h4>
+                                            <h4 class="info-title">Cloud</h4>
                                             <p class="description">
-                                                We've created the marketing campaign of the website. It was a very interesting collaboration.
+                                                Do not miss your maps. Using CMPaaS you will have access to your maps wherever and whenever you want, since it will be stored in our cloud.
                                             </p>
                                         </div>
                                     </div>
@@ -61,9 +61,9 @@
                                             <i class="material-icons">code</i>
                                         </div>
                                         <div class="description">
-                                            <h4 class="info-title">Fully Coded in HTML5</h4>
+                                            <h4 class="info-title">Open-Source</h4>
                                             <p class="description">
-                                                We've developed the website with HTML5 and CSS3. The client has access to the code using GitHub.
+                                                Our project is completely open-source. You can use our api's freely in your projects and integrate them into the CMPaaS.
                                             </p>
                                         </div>
                                     </div>
@@ -72,9 +72,9 @@
                                             <i class="material-icons">group</i>
                                         </div>
                                         <div class="description">
-                                            <h4 class="info-title">Built Audience</h4>
+                                            <h4 class="info-title">Social Concept Map Network</h4>
                                             <p class="description">
-                                                There is also a Fully Customizable CMS Admin Dashboard for this product.
+                                                You can use our services to interact with the mapping community, build collaborative maps, access and publish your maps for surveys across the network.
                                             </p>
                                         </div>
                                     </div>
@@ -95,25 +95,25 @@
                                 </div>
                                 <form class="form" [formGroup]="registerForm" (ngSubmit)="doRegister($event)">
                                     <div class="card-content">
-                                         <div class="input-group">
+                                         <div class="input-group" [ngClass]="{'has-error':!registerForm.controls['name'].valid}">
                                             <span class="input-group-addon">
                                                 <i class="material-icons">assignment</i>
                                             </span>
                                             <input formControlName="name" type="text" class="form-control" placeholder="Full Name...">
                                         </div>
-                                        <div class="input-group">
+                                        <div class="input-group" [ngClass]="{'has-error':!registerForm.controls['email'].valid}">
                                             <span class="input-group-addon">
                                                 <i class="material-icons">email</i>
                                             </span>
                                             <input formControlName="email" type="text" class="form-control" placeholder="Email...">
                                         </div>
-                                        <div class="input-group">
+                                        <div class="input-group" [ngClass]="{'has-error':!registerForm.controls['username'].valid}">
                                             <span class="input-group-addon">
                                                 <i class="material-icons">face</i>
                                             </span>
                                             <input formControlName="username" type="text" class="form-control" placeholder="Username...">
                                         </div>
-                                        <div class="input-group">
+                                        <div class="input-group" [ngClass]="{'has-error':!registerForm.controls['password'].valid}">
                                             <span class="input-group-addon">
                                                 <i class="material-icons">lock_outline</i>
                                             </span>
@@ -122,13 +122,13 @@
                                         <!-- If you want to add a checkbox to this form, uncomment this code -->
                                         <div class="checkbox">
                                             <label>
-                                                <input type="checkbox" name="optionsCheckboxes" checked> I agree to the
-                                                <a href="#something">terms and conditions</a>.
+                                                <input type="checkbox" name="optionsCheckboxes" checked (change)="termsChange($event)"> I agree to the
+                                                <a href="https://choosealicense.com/licenses/agpl-3.0/" target="_blank">terms and conditions</a>.
                                             </label>
                                         </div>
                                     </div>
                                     <div class="footer text-center">
-                                        <button type="submit" class="btn btn-primary btn-round"> Get Started </button>
+                                        <button id="bt-register" type="submit" class="btn btn-primary btn-round" [disabled]="!registerForm.valid"> Get Started </button>
                                         <!--<a (click)="register($event)" class="btn btn-primary btn-round">Get Started</a>-->
                                     </div>
                                 </form>
@@ -140,7 +140,7 @@
         </div>
         <footer class="footer">
             <div class="container">
-                <nav class="pull-left">
+                <!--<nav class="pull-left">
                     <ul>
                         <li>
                             <a href="#">
@@ -163,14 +163,14 @@
                             </a>
                         </li>
                     </ul>
-                </nav>
+                </nav>-->
                 <p class="copyright pull-right">
                     &copy;
                     {{test | date: 'yyyy'}}
-                    <a href="https://www.creative-tim.com">Creative Tim</a>, made with love for a better web
+                    <a href="http://www.ufes.br">Wagner Perin/UFES/CMPaaS Project</a>
                 </p>
             </div>
         </footer>
-        <div class="full-page-background" style="background-image: url(../../../assets/img/register.jpeg) "></div>
+        <div class="full-page-background" style="background-image: url(../../../assets/img/bgufes.jpg) "></div>
     </div>
 </div>
