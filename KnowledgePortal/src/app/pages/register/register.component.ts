@@ -4,7 +4,8 @@ import { Router, RouterStateSnapshot } from "@angular/router";
 import { UserService } from "app/_services/user.service";
 
 declare var swal: any;
-declare var $: any
+declare var $: any;
+declare var FB: any;
 
 @Component({
     selector: 'app-register-cmp',
@@ -27,6 +28,13 @@ export class RegisterComponent implements OnInit {
             // after 1000 ms we add the class animated to the login/register card
             $('.card').removeClass('card-hidden');
         }, 700);
+        //inicializa o facebook api
+        FB.init({
+            appId      : '325995001229978',
+            cookie     : true,
+            xfbml      : true,
+            version    : 'v2.12'
+        });
     }
 
     termsChange(event) {
@@ -66,4 +74,44 @@ export class RegisterComponent implements OnInit {
                 }
             );
     }
+    fbRegister(event) {
+        event.preventDefault();
+        FB.login(result => {
+            if (result.authResponse) {
+                this.userService.fbCreate({access_token: result.authResponse.accessToken})
+                    .subscribe(
+                        data => {
+                            swal({
+                                type: 'success',
+                                html: 'Greate! <strong>' +
+                                        'User creation successfull' +
+                                    '</strong>. <br /> You\'re be redirect.',
+                                confirmButtonClass: 'btn btn-success',
+                                buttonsStyling: false
+                            });
+                            localStorage.setItem('token', data.headers.get('x-access-token'));
+                            this.router.navigate(['/dashboard']);
+                        }, error => {
+                            swal({
+                                type: 'error',
+                                html: 'Oooopppss! <strong>' +
+                                        error.error.userMessage +
+                                    '</strong>. <br /> You can correct it and try again!',
+                                confirmButtonClass: 'btn btn-danger',
+                                buttonsStyling: false
+                            });
+                        }
+                    );
+            } else {
+                swal({
+                    type: 'error',
+                    html: 'Oooopppss! <strong>' +
+                            'There\'s something wrong going on here' +
+                        '</strong>. <br /> You can try again later!',
+                    confirmButtonClass: 'btn btn-danger',
+                    buttonsStyling: false
+                });
+            }
+        }, {scope: 'public_profile,email'});
+   }
 }

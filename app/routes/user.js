@@ -8,6 +8,10 @@ module.exports = app => {
         .get(api.list)
         .put(api.bulkUpdate)
         .delete(api.removeAll);
+    
+    app.route('/v1/users/facebook')
+        .post(api.fbCreate)
+
     app
         .route('/v1/users/myuser')
         .get(authApi.authenticationRequired, api.myUser);

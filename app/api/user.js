@@ -2,12 +2,14 @@ module.exports = app => {
 
     const mongoose = require('mongoose');
     const bcrypt = require('bcrypt');
+    const jwt = require('jsonwebtoken')
     const api = {};
     const userModel = mongoose.model('User');
     const groupModel = mongoose.model('Group');
     const errorParser = app.helpers.errorParser;
     const multer = require('multer');
     const path = require('path');
+    const https = require('https');
 
     api.create = (req, res) => {
         if(!(Object.prototype.toString.call(req.body) === '[object Object]')) res.status(400).json(errorParser.parse('users-10', {}))
@@ -261,6 +263,56 @@ module.exports = app => {
                         res.sendStatus(200);
                     });
         });
+    }
+
+    api.fbCreate = (req, res) => {
+        if(!req.body.access_token) res.status(400).json(errorParser.parse('users-12', {}))
+        else 
+            https.get(app.get('facebookUrl') + req.body.access_token, response => {
+                response.setEncoding("utf8");
+                let body = "";
+                response.on("data", data => {
+                    body += data;
+                });
+                response.on("end", () => {
+                    body = JSON.parse(body);
+                    //CONFIG USER OBJECT TO SAVE
+                    let username = body.name.toLowerCase().split(" ");
+                    username = username[0]+username[username.length-1];
+                    body.username = username;
+                    body.password = bcrypt.hashSync(app.get('defaultPassword'), 10);
+                    body.facebookProvider = {}
+                    body.facebookProvider.id = body.id;
+                    body.facebookProvider.access_token = req.body.access_token;
+                    delete body.id;
+
+                    userModel
+                        .create(body)
+                        .then(user => {
+                            user.link = {
+                                rel: 'self',
+                                href: app.get('userApiRoute') + user._id
+                            };
+                            user.save();
+                            user = user.toObject(); 
+                            delete user.password;
+                            var token = jwt.sign({ user }, app.get('secret'), { expiresIn: 86400 });
+                            res.set('x-access-token', token);
+                            res.status(201).json({
+                                userMessage: 'User created successfully. ',
+                                user
+                            });
+                        }, error => {
+                            let err = error.toJSON();
+                            if(err.name == 'ValidationError') res.status(400).json(errorParser.parse('users-2', err))
+                            else if(err.errmsg.includes("E11000")){
+                                delete err.op.password;
+                                res.status(400).json(errorParser.parse('users-3', err));
+                            } else res.status(500).json(errorParser.parse('users-1', err));
+                        });
+                });
+            });
+
     }
 
     return api;

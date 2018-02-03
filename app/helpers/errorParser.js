@@ -92,6 +92,14 @@ module.exports = app => {
                     devMessage: errorObject
                 };
                 break;
+            case 'users-12':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('userApiErrorsRoute'),
+                    userMessage: 'Bad Request: Facebook access_token not provided',
+                    devMessage: errorObject
+                };
+                break;
             case 'groups-1':
                 error = {
                     errorCode,

@@ -12,4 +12,8 @@ export class UserService {
         return this.http.post(uri+'/v1/users', user);
     }
 
+    fbCreate(token: Object){
+        return this.http.post(uri+'/v1/users/facebook', token, {observe: 'response'});
+    }
+
 }

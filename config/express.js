@@ -28,10 +28,9 @@ app.use(function (req, res, next) {
     next();
 });
 
-app.set('secret', 'cmpaasufes');
+app.set('secret', 'Cmp@asUf3s');
+
 app.set('adminGroupName', 'Administrators');
-
-
 app.set('userApiRoute', '/v1/users/');
 app.set('userApiErrorsRoute', '/v1/errors/users/');
 app.set('groupApiRoute', '/v1/groups/');
@@ -40,7 +39,8 @@ app.set('authApiRoute', '/v1/auth/');
 app.set('authApiErrorsRoute', '/v1/errors/auth/');
 app.set('mapApiRoute', '/v1/maps/');
 app.set('mapApiErrorsRoute', '/v1/errors/maps/');
-
+app.set('facebookUrl', 'https://graph.facebook.com/me?fields=name%2Cemail&access_token=');
+app.set('defaultPassword', '!@#123Cmpaas'); //used to set default password to users from facebook and other authentication methods
 
 consign({cwd: 'app'})
     .include('helpers')

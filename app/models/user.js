@@ -79,6 +79,16 @@ var schema = mongoose.Schema({
     }],
     profilePicture: {
         type: String
+    },
+    facebookProvider: {
+        id: {
+            type: String,
+            select: false
+        },
+        access_token: {
+            type: String,
+            select: false
+        }
     }
 }, { usePushEach: true });
 
