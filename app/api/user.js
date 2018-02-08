@@ -315,5 +315,59 @@ module.exports = app => {
 
     }
 
+    api.gCreate = (req, res) => {
+        if(!(req.body.id_token)) res.status(400).json(errorParser.parse('users-13', {}))
+        else 
+            https.get(app.get('googleUrl') + req.body.id_token, response => {
+                response.setEncoding("utf8");
+                let body = "";
+                response.on("data", data => {
+                    body += data;
+                });
+                response.on("end", () => {
+                    let user = {};
+                    body = JSON.parse(body);
+                    //CONFIG USER OBJECT TO SAVE
+                    let username = body.name.toLowerCase().split(" ");
+                    username = username[0]+username[username.length-1];
+                    user.username = username;
+                    user.password = bcrypt.hashSync(app.get('defaultPassword'), 10);
+                    user.googleProvider = {}
+                    user.googleProvider.id = req.body.id;
+                    user.googleProvider.id_token = req.body.id_token;
+                    user.email = body.email;
+                    user.name = body.name;
+                    user.profilePicture = body.picture;
+                    
+
+                    userModel
+                        .create(user)
+                        .then(user => {
+                            user.link = {
+                                rel: 'self',
+                                href: app.get('userApiRoute') + user._id
+                            };
+                            user.save();
+                            user = user.toObject(); 
+                            delete user.password;
+                            var token = jwt.sign({ user }, app.get('secret'), { expiresIn: 86400 });
+                            res.set('x-access-token', token);
+                            res.status(201).json({
+                                userMessage: 'User created successfully. ',
+                                user
+                            });
+                        }, error => {
+                            let err = error.toJSON();
+                            if(err.name == 'ValidationError') res.status(400).json(errorParser.parse('users-2', err))
+                            else if(err.errmsg.includes("E11000")){
+                                delete err.op.password;
+                                res.status(400).json(errorParser.parse('users-3', err));
+                            } else res.status(500).json(errorParser.parse('users-1', err));
+                        });
+                });
+            });
+
+    }
+
     return api;
 }

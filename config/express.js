@@ -40,6 +40,7 @@ app.set('authApiErrorsRoute', '/v1/errors/auth/');
 app.set('mapApiRoute', '/v1/maps/');
 app.set('mapApiErrorsRoute', '/v1/errors/maps/');
 app.set('facebookUrl', 'https://graph.facebook.com/me?fields=name%2Cemail&access_token=');
+app.set('googleUrl', 'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=');
 app.set('defaultPassword', '!@#123Cmpaas'); //used to set default password to users from facebook and other authentication methods
 
 consign({cwd: 'app'})

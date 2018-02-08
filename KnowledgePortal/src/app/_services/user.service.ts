@@ -16,4 +16,7 @@ export class UserService {
         return this.http.post(uri+'/v1/users/facebook', token, {observe: 'response'});
     }
 
+    gCreate(token: Object){
+        return this.http.post(uri+'/v1/users/google', token, {observe: 'response'});
+    }
 }

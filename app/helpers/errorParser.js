@@ -100,6 +100,14 @@ module.exports = app => {
                     devMessage: errorObject
                 };
                 break;
+            case 'users-13':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('userApiErrorsRoute'),
+                    userMessage: 'Bad Request: Google id_token not sended',
+                    devMessage: errorObject
+                };
+                break;
             case 'groups-1':
                 error = {
                     errorCode,

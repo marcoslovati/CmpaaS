@@ -11,6 +11,9 @@ module.exports = app => {
     
     app.route('/v1/users/facebook')
         .post(api.fbCreate)
+    
+    app.route('/v1/users/google')
+        .post(api.gCreate)
 
     app
         .route('/v1/users/myuser')
