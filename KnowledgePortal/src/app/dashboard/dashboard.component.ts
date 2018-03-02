@@ -4,6 +4,7 @@ import { LegendItem, ChartType } from '../md/md-chart/md-chart.component';
 
 import * as Chartist from 'chartist';
 import { HttpClient } from "@angular/common/http";
+import { Router } from "@angular/router";
 
 declare const $: any;
 
@@ -12,7 +13,9 @@ declare const $: any;
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnInit, AfterViewInit {
-    constructor(public http:HttpClient) { }
+    private authUser : Object;
+    
+    constructor(public http:HttpClient, private router: Router) { }
   // constructor(private navbarTitleService: NavbarTitleService, private notificationService: NotificationService) { }
   public tableData: TableData;
   startAnimationForLineChart(chart: any) {
@@ -196,9 +199,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           });
         
     
-          this.http.get('http://localhost:3000/v1/myuser/maps')
+          this.http.get('http://localhost:3000/v1/myuser/')
             .subscribe(
-                res => console.log(res),
+                res => this.authUser = res as Object,
                 error => console.log(error)
             );
 
@@ -232,5 +235,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
                });
            });
        }
+   }
+   editorRedirect(event){
+       event.preventDefault();
+       this.router.navigate(['/editors/conceptmap']);
    }
 }

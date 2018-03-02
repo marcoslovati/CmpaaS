@@ -46,7 +46,21 @@ var schema = mongoose.Schema({
     isPublic: {
         type: Boolean,
         default: true
-    }
+    },
+    versions: [
+        {
+            _id: {
+                type: mongoose.Schema.Types.ObjectId, 
+                ref: 'MapContent'
+            },
+            created: {
+                type: Date
+            },
+            content: {
+                type: mongoose.Schema.Types.Mixed
+            }
+        }
+    ]
 }, { usePushEach: true });
 
 mongoose.model('Map', schema);

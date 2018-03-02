@@ -152,59 +152,78 @@ export class FormatToolsPluginComponent implements OnInit {
       } );
 
       $('#bt-save').click(() => {
+          alert(myDiagram.model.toJson());
           swal({
-                    title: 'New Map Data',
                     html: '<div class="col-md-12">'+
-                         '<form class="form-horizontal">'+
-                            '<div class="row">'+
-                               '<div class="col-sm-12">'+
-                                    '<div class="form-group label-floating is-empty">'+
-                                        '<label class="control-label"></label>'+
-                                        '<input id="map-title" type="text" class="form-control" placeholder="Map Title">'+
-                                        '<span class="help-block">A title will allow you to identify this map on your map list.</span>'+
+                            '<div class="card">'+
+                                '<form method="get" action="/" class="form-horizontal">'+
+                                    '<div class="card-header" data-background-color="orange">'+
+                                        '<small><h6 class="card-title">Map Informations</h6></small>'+
                                     '</div>'+
-                                '</div>'+
-                            '</div>' +
-                            '<div class="row">'+
-                               '<div class="col-sm-12">'+
-                                    '<div class="form-group label-floating is-empty">'+
-                                        '<label class="control-label"></label>'+
-                                        '<input id="map-description" type="text" class="form-control" placeholder="Map Description">'+
-                                        '<span class="help-block">Give more informations about this map.</span>'+
-                                    '</div>'+
-                                '</div>'+
-                            '</div>' +
-                            '<div class="row">'+
-                               '<div class="col-sm-12">'+
-                                    '<div class="form-group label-floating is-empty">'+
-                                        '<label class="control-label"></label>'+
-                                        '<input id="map-question" type="text" class="form-control" placeholder="Investigation Question">'+
-                                        '<span class="help-block">Wich question this map aims to answer?</span>'+
-                                    '</div>'+
-                                '</div>'+
-                            '</div>' +
-                            '<div class="row">'+
-                               '<div class="col-sm-12">'+
-                                    '<div class="form-group label-floating is-empty">'+
-                                        '<label class="control-label"></label>'+
-                                        '<input id="map-keywords" type="text" class="form-control" placeholder="Keywords">'+
-                                        '<span class="help-block">Keywords of this map separeted by comma.</span>'+
-                                    '</div>'+
-                                '</div>'+
-                            '</div>' +
-                            '<div class="row">'+
-                               '<div class="col-sm-12">'+
-                                    '<a href="javascript:void(0)" class="switch-trigger">'+
-                                        'Public'+
-                                        '<div class="togglebutton switch-sidebar-mini">'+
-                                            '<label>'+
-                                                '<input id="map-public" type="checkbox">'+
-                                            '</label>'+
+                                    '<div class="card-content">'+
+                                        '<div class="row">'+
+                                            '<label class="col-md-3 label-on-left">Title</label>'+
+                                            '<div class="col-md-9">'+
+                                                '<div class="form-group label-floating is-empty">'+
+                                                    '<label class="control-label"></label>'+
+                                                    '<input type="text" class="form-control" value id="map-title">'+
+                                                    '<span class="help-block">A title will help you to find this map in the future.</span>'+
+                                                '</div>'+
+                                            '</div>'+
                                         '</div>'+
-                                    '</a>'+
-                                '</div>'+
-                            '</div>' +
-                        '</form>'+
+                                        '<div class="row">'+
+                                            '<label class="col-md-3 label-on-left">Description</label>'+
+                                            '<div class="col-md-9">'+
+                                                '<div class="form-group label-floating is-empty">'+
+                                                    '<label class="control-label"></label>'+
+                                                    '<input id="map-description" type="text" class="form-control" value>'+
+                                                    '<span class="help-block">Give some more informations about this map.</span>'+
+                                                '</div>'+
+                                            '</div>'+
+                                        '</div>'+
+                                        '<div class="row">'+
+                                            '<label class="col-md-3 label-on-left">Investigation Question</label>'+
+                                            '<div class="col-md-9">'+
+                                                '<div class="form-group label-floating is-empty">'+
+                                                    '<label class="control-label"></label>'+
+                                                    '<input id="map-question" type="text" class="form-control" value>'+
+                                                    '<span class="help-block">A question that this map aims to answer.</span>'+
+                                                '</div>'+
+                                            '</div>'+
+                                        '</div>'+
+                                        '<div class="row">'+
+                                            '<label class="col-md-3 label-on-left">Keywords</label>'+
+                                            '<div class="col-md-9">'+
+                                                '<div class="form-group label-floating is-empty">'+
+                                                    '<label class="control-label"></label>'+
+                                                    '<input id="map-keywords" type="text" class="form-control" value>'+
+                                                    '<span class="help-block">Separeted y comma. Used to find this map.</span>'+
+                                                '</div>'+
+                                            '</div>'+
+                                        '</div>'+
+                                        '<div class="row">'+
+                                            '<label class="col-md-3 label-on-left">Access Level</label>'+
+                                            '<div class="col-md-9">'+
+                                                '<div class="radio checkbox-inline">'+
+                                                    '<label>'+
+                                                        '<input id="map-public" type="radio" name="optionsRadios" checked="true"> Public'+
+                                                    '</label>'+
+                                                '</div>'+
+                                                '<div class="radio checkbox-inline">'+
+                                                    '<label>'+
+                                                        '<input type="radio" name="optionsRadios"> Groups'+
+                                                    '</label>'+
+                                                '</div>'+
+                                                '<div class="radio checkbox-inline">'+
+                                                    '<label>'+
+                                                        '<input type="radio" name="optionsRadios"> Private'+
+                                                    '</label>'+
+                                                '</div>'+
+                                            '</div>'+
+                                        '</div>'+
+                                    '</div>'+
+                                '</form>'+
+                            '</div>'+
                         '</div>',
                     showCancelButton: true,
                     confirmButtonClass: 'btn btn-success',
@@ -218,6 +237,8 @@ export class FormatToolsPluginComponent implements OnInit {
                         keywords: [].concat(($('#map-keywords').val()).replace(/ /g,'').split(",")),
                         isPublic: $('#map-public').prop('checked')
                     };
+
+                    console.log(JSON.stringify(map));
 
                     $.ajax({
                         type: 'POST',
