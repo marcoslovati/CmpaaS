@@ -58,6 +58,14 @@ var schema = mongoose.Schema({
             },
             content: {
                 type: mongoose.Schema.Types.Mixed
+            },
+            link: {
+                rel: {
+                    type: String
+                },
+                href: {
+                    type: String
+                }
             }
         }
     ]

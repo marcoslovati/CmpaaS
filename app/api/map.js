@@ -3,6 +3,7 @@ module.exports = app => {
     const api = {};
     const userModel = mongoose.model('User');
     const mapModel = mongoose.model('Map');
+    const mapContentModel = mongoose.model('MapContent');
     const errorParser = app.helpers.errorParser;
 
     api.create = (req, res) => {
@@ -39,6 +40,31 @@ module.exports = app => {
     };
     
     api.createContent = (req, res) => {
+        //req.params.mapId req.body.content
+        let saveObject = {};
+        saveObject.map = {};
+        saveObject.map._id = req.params.mapId;
+        saveObject.map.link = {};
+        saveObject.map.link.rel = 'map';
+        saveObject.map.link.href = '/v1/maps/'+req.params.mapId;
+        saveObject.content = req.body.content
+        mapContentModel
+            .create(saveObject)
+            .then(mapContent => {
+                mapContent.link = {
+                    rel: 'mapContent',
+                    href: app.get('mapApiRoute') + req.params.mapId + "/content/" + mapContent._id
+                };
+
+                mapModel
+                    .findById(req.params.mapId)
+                    .then(map => {
+                        map.versions.push(mapContent);
+                        map.save();
+                    });
+
+                res.json(mapContent);
+            });
     };
 
     return api;

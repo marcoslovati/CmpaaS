@@ -269,6 +269,22 @@ module.exports = app => {
                     devMessage: errorObject
                 };
                 break;
+            case 'mapContent-1':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('mapContentApiErrorsRoute'),
+                    userMessage: 'Internal server error: ' + errorObject.errmsg,
+                    devMessage: errorObject
+                };
+                break;
+            case 'mapContent-2':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('mapContentApiErrorsRoute'),
+                    userMessage: 'Bad request: ' + errorObject.message,
+                    devMessage: errorObject
+                };
+                break;
         }
 
         return error;
