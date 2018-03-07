@@ -152,7 +152,7 @@ export class FormatToolsPluginComponent implements OnInit {
       } );
 
       $('#bt-save').click(() => {
-          alert(myDiagram.model.toJson());
+          //alert(myDiagram.model.toJson());
           swal({
                     html: '<div class="col-md-12">'+
                             '<div class="card">'+
@@ -249,14 +249,49 @@ export class FormatToolsPluginComponent implements OnInit {
                         },
                         data: (JSON.stringify(map)).toString()
                     }).done(function(res) { 
-                        swal({
-                            type: 'success',
-                            html: 'Result: <strong>' +
-                                    res.userMessage +
-                                '</strong>',
-                            confirmButtonClass: 'btn btn-success',
-                            buttonsStyling: false
+                        // swal({
+                        //     type: 'success',
+                        //     html: 'Result: <strong>' +
+                        //             res.userMessage +
+                        //         '</strong>',
+                        //     confirmButtonClass: 'btn btn-success',
+                        //     buttonsStyling: false
 
+                        // });
+                        let obj = {
+                            map: res.map,
+                            content: JSON.parse(myDiagram.model.toJson())
+                        };
+                        
+                        $.ajax({
+                            type: 'POST',
+                            contentType: 'application/json',
+                            url: 'http://localhost:3000/v1/mapContent',
+                            headers: {
+                                "X-Access-Token": localStorage.getItem('token')
+                            },
+                            data: JSON.stringify(obj)
+                        }).done(function(response) { 
+                            swal({
+                                type: 'success',
+                                html: 'Result: <strong>' +
+                                        response.userMessage +
+                                    '</strong>',
+                                confirmButtonClass: 'btn btn-success',
+                                buttonsStyling: false
+
+                            });
+                        }).catch(function(error) {
+                            console.log(error);
+                            swal({
+                                type: 'error',
+                                html: 'Error: <strong>' +
+                                        JSON.parse(error.responseText).userMessage +
+                                    '</strong>',
+                                confirmButtonClass: 'btn btn-error',
+                                buttonsStyling: false
+
+                            });
                         });
                     }).catch(function(error) {
                         console.log(error);

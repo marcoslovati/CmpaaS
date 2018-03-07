@@ -29,6 +29,9 @@ var schema = mongoose.Schema({
         href: {
             type: String
         }
+    },
+    image: {
+        type: String
     }
 }, { usePushEach: true });
 
