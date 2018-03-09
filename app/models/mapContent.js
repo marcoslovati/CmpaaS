@@ -31,7 +31,7 @@ var schema = mongoose.Schema({
         }
     },
     image: {
-        type: String
+        type: mongoose.Schema.Types.Mixed
     }
 }, { usePushEach: true });
 

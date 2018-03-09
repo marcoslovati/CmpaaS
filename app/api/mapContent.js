@@ -26,5 +26,13 @@ module.exports = app => {
             }, error => res.status(500).json(errorParser.parse('maps-2', error)));
     };
 
+    api.getContent = (req, res) => {
+        var id = mongoose.Types.ObjectId('5aa2c9cb7757761377d63ff8');
+        mapContentModel
+            .findById(id)
+            .then(content => {
+                res.json(content);
+            })
+    }
     return api;
 }

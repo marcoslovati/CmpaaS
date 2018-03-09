@@ -5,4 +5,5 @@ module.exports = app => {
     app
         .route('/v1/mapContent')
         .post(authApi.authenticationRequired, api.create)
+        .get(api.getContent); // teste
 }
