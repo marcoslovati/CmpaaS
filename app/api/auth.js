@@ -27,7 +27,7 @@ module.exports = app => {
     };
 
     api.authenticationRequired = (req, res, next) => {
-        var token = req.headers['x-access-token'];
+        var token = req.headers['x-access-token'] || req.body.token || req.query.token;
         if(token) 
             jwt.verify(token, app.get('secret'), (error, decoded) => {
                 if(error) res.status(401).json(errorParser.parse('auth-5', {}))
