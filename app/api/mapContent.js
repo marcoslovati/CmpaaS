@@ -27,7 +27,7 @@ module.exports = app => {
     };
 
     api.getContent = (req, res) => {
-        var id = mongoose.Types.ObjectId('5aa2c9cb7757761377d63ff8');
+        var id = mongoose.Types.ObjectId('5aaad0789c81c107c0dc1abc');
         mapContentModel
             .findById(id)
             .then(content => {
