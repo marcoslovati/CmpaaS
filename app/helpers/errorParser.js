@@ -265,8 +265,8 @@ module.exports = app => {
                 error = {
                     errorCode,
                     moreInfo: app.get('authApiErrorsRoute'),
-                    userMessage: 'Facebook login failure: The email of this user was not found. Try to register with the form.',
-                    devMessage: errorObject
+                    userMessage: 'Login failure: The email of this user was not found. Maybe you don`t have a registered account.',
+                    devMessage: 'Associated email address was not found. Make a registration of this user.'
                 };
                 break;
             case 'auth-12':

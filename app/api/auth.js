@@ -41,20 +41,23 @@ module.exports = app => {
                     userModel
                         .findOne({email: body.email})
                         .then(user => {
-                            user.facebookProvider = {}
-                            user.facebookProvider.id = body.id;
-                            user.facebookProvider.access_token = req.body.access_token;
-                            user.save();
-                            user = user.toObject(); 
-                            delete user.password;
-                            var token = jwt.sign({ user }, app.get('secret'), { expiresIn: 86400 });
-                            res.set('x-access-token', token);
-                            res.status(201).json({
-                                userMessage: 'User loged successfully. ',
-                                user
-                            });
+                            if(!user) res.status(404).json(errorParser.parse('auth-11', {}));
+                            else {
+                                user.facebookProvider = {}
+                                user.facebookProvider.id = body.id;
+                                user.facebookProvider.access_token = req.body.access_token;
+                                user.save();
+                                user = user.toObject(); 
+                                delete user.password;
+                                var token = jwt.sign({ user }, app.get('secret'), { expiresIn: 86400 });
+                                res.set('x-access-token', token);
+                                res.status(201).json({
+                                    userMessage: 'User loged successfully. ',
+                                    user
+                                });
+                            }
                         }, error => {
-                            res.status(404).json(errorParser.parse('auth-11', error));
+                            res.status(500).json(errorParser.parse('auth-3', error));
                         });
                 });
             });
@@ -74,21 +77,24 @@ module.exports = app => {
                     userModel
                         .findOne({email: body.email})
                         .then(user => {
-                            user.googleProvider = {}
-                            user.googleProvider.id = req.body.id;
-                            user.googleProvider.id_token = req.body.id_token;
-                            user.profilePicture = body.picture;
-                            user.save();
-                            user = user.toObject(); 
-                            delete user.password;
-                            var token = jwt.sign({ user }, app.get('secret'), { expiresIn: 86400 });
-                            res.set('x-access-token', token);
-                            res.status(201).json({
-                                userMessage: 'User created successfully. ',
-                                user
-                            });
+                            if(!user) res.status(404).json(errorParser.parse('auth-11', {}));
+                            else{
+                                user.googleProvider = {}
+                                user.googleProvider.id = req.body.id;
+                                user.googleProvider.id_token = req.body.id_token;
+                                user.profilePicture = body.picture;
+                                user.save();
+                                user = user.toObject(); 
+                                delete user.password;
+                                var token = jwt.sign({ user }, app.get('secret'), { expiresIn: 86400 });
+                                res.set('x-access-token', token);
+                                res.status(201).json({
+                                    userMessage: 'User created successfully. ',
+                                    user
+                                });
+                            }
                         }, error => {
-                            res.status(404).json(errorParser.parse('auth-11', error));
+                            res.status(500).json(errorParser.parse('auth-3', error));
                         });
                 });
             });
