@@ -38,6 +38,12 @@ module.exports = app => {
             .find({})
             .then(maps => res.json(maps), error => error => res.status(500).json(errorParser.parse('maps-2', error)));
     };
+
+    api.findById = (req, res) => {
+        mapModel
+            .findById(req.params.mapId)
+            .then(maps => res.json(maps), error => error => res.status(500).json(errorParser.parse('maps-2', error)));
+    };
     
     api.createContent = (req, res) => {
         //req.params.mapId req.body.content

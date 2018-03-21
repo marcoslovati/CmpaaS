@@ -5,6 +5,7 @@ module.exports = app => {
     var userModel = mongoose.model('User');
     var groupModel = mongoose.model('Group');
     const errorParser = app.helpers.errorParser;
+    const https = require('https');
 
     api.authenticate = (req, res) => {
         if(!(Object.prototype.toString.call(req.body) === '[object Object]') || !(req.body.username) || !(req.body.password)) 
@@ -21,10 +22,43 @@ module.exports = app => {
                     if(usr.groups.some(g => g.name == app.get('adminGroupName'))) usr.isAdmin = true; //Admin check on authentication proccess
                     var token = jwt.sign({ user: usr }, app.get('secret'), { expiresIn: 86400 });
                     res.set('x-access-token', token);
-                    res.sendStatus(204);
+                    res.json(usr);
                 }                   
             }, error => res.status(500).json(errorParser.parse('auth-3', error)));
     };
+
+    api.fbAuthenticate = (req, res) => {
+        if(!req.body.access_token) res.status(400).json(errorParser.parse('auth-10', {}))
+        else 
+            https.get(app.get('facebookUrl') + req.body.access_token, response => {
+                response.setEncoding("utf8");
+                let body = "";
+                response.on("data", data => {
+                    body += data;
+                });
+                response.on("end", () => {
+                    body = JSON.parse(body);
+                    userModel
+                        .findOne({email: body.email})
+                        .then(user => {
+                            user.facebookProvider = {}
+                            user.facebookProvider.id = body.id;
+                            user.facebookProvider.access_token = req.body.access_token;
+                            user.save();
+                            user = user.toObject(); 
+                            delete user.password;
+                            var token = jwt.sign({ user }, app.get('secret'), { expiresIn: 86400 });
+                            res.set('x-access-token', token);
+                            res.status(201).json({
+                                userMessage: 'User loged successfully. ',
+                                user
+                            });
+                        }, error => {
+                            res.status(404).json(errorParser.parse('auth-11', error));
+                        });
+                });
+            });
+    }
 
     api.authenticationRequired = (req, res, next) => {
         var token = req.headers['x-access-token'] || req.body.token || req.query.token;

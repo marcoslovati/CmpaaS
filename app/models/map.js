@@ -66,6 +66,9 @@ var schema = mongoose.Schema({
                 href: {
                     type: String
                 }
+            },
+            image: {
+                type: mongoose.Schema.Types.Mixed
             }
         }
     ]

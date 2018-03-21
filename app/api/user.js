@@ -233,7 +233,7 @@ module.exports = app => {
             });
     };
 
-    api.myUser = (req, res) => {
+    api.me = (req, res) => {
         userModel
             .findById(req.auth.user._id)
             .then(user => {

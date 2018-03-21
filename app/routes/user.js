@@ -16,8 +16,8 @@ module.exports = app => {
         .post(api.gCreate)
 
     app
-        .route('/v1/users/myuser')
-        .get(authApi.authenticationRequired, api.myUser);
+        .route('/v1/users/me')
+        .get(authApi.authenticationRequired, api.me);
     
     app
         .route('/v1/users/photo')

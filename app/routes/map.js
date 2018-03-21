@@ -5,9 +5,13 @@ module.exports = app => {
     app
         .route('/v1/maps')
         .post(authApi.authenticationRequired, api.create)
-        .get(authApi.authenticationRequired, api.list)
+        .get(authApi.authenticationRequired, api.list);
+    
+     app
+        .route('/v1/maps/:mapId')
+        .get(authApi.authenticationRequired, api.findById);
     
     app
         .route('/v1/maps/:mapId/content')
-        .post(authApi.authenticationRequired, api.createContent)
+        .post(authApi.authenticationRequired, api.createContent);
 }

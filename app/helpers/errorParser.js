@@ -253,6 +253,22 @@ module.exports = app => {
                     devMessage: 'Group Admin method.'
                 };
                 break;
+            case 'auth-10':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('authApiErrorsRoute'),
+                    userMessage: 'Bad Request: You don`t have sended a facebook token.',
+                    devMessage: 'Facebook token needed.'
+                };
+                break;
+            case 'auth-11':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('authApiErrorsRoute'),
+                    userMessage: 'Facebook login failure: The email of this user was not found. Try to register with the form.',
+                    devMessage: errorObject
+                };
+                break;
             case 'maps-1':
                 error = {
                     errorCode,
