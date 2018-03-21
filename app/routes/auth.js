@@ -8,6 +8,10 @@ module.exports = app => {
     app
         .route('/v1/auth/facebook')
         .post(api.fbAuthenticate);
+
+    app
+        .route('/v1/auth/google')
+        .post(api.gAuthenticate);
     
     app
         .route('/v1/test')

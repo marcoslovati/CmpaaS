@@ -60,6 +60,41 @@ module.exports = app => {
             });
     }
 
+    api.gAuthenticate = (req, res) => {
+        if(!(req.body.id_token)) res.status(400).json(errorParser.parse('auth-12', {}))
+        else 
+            https.get(app.get('googleUrl') + req.body.id_token, response => {
+                response.setEncoding("utf8");
+                let body = "";
+                response.on("data", data => {
+                    body += data;
+                });
+                response.on("end", () => {
+                    body = JSON.parse(body);
+                    userModel
+                        .findOne({email: body.email})
+                        .then(user => {
+                            user.googleProvider = {}
+                            user.googleProvider.id = req.body.id;
+                            user.googleProvider.id_token = req.body.id_token;
+                            user.profilePicture = body.picture;
+                            user.save();
+                            user = user.toObject(); 
+                            delete user.password;
+                            var token = jwt.sign({ user }, app.get('secret'), { expiresIn: 86400 });
+                            res.set('x-access-token', token);
+                            res.status(201).json({
+                                userMessage: 'User created successfully. ',
+                                user
+                            });
+                        }, error => {
+                            res.status(404).json(errorParser.parse('auth-11', error));
+                        });
+                });
+            });
+
+    }
+
     api.authenticationRequired = (req, res, next) => {
         var token = req.headers['x-access-token'] || req.body.token || req.query.token;
         if(token) 

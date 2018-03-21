@@ -269,6 +269,14 @@ module.exports = app => {
                     devMessage: errorObject
                 };
                 break;
+            case 'auth-12':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('authApiErrorsRoute'),
+                    userMessage: 'Bad Request: You don`t have sended o google authentication token.',
+                    devMessage: 'Google token needed.'
+                };
+                break;
             case 'maps-1':
                 error = {
                     errorCode,
