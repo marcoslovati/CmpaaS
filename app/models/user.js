@@ -77,6 +77,23 @@ var schema = mongoose.Schema({
                 }
             }
     }],
+    debates: [{
+        _id: {
+                type: mongoose.Schema.Types.ObjectId, 
+                ref: 'Debate'
+            },
+        name: {
+            type: String
+        },
+        link: {
+                rel: {
+                    type: String
+                },
+                href: {
+                    type: String
+                }
+            }
+    }],
     profilePicture: {
         type: String
     },

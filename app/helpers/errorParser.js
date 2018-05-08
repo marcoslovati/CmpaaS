@@ -309,6 +309,39 @@ module.exports = app => {
                     devMessage: errorObject
                 };
                 break;
+            case 'debates-1':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('debateApiErrorsRoute'),
+                    userMessage: 'The request body is incorrect.',
+                    devMessage: 'This resource spect a object in the body request.'
+                };
+                break;
+            case 'debates-2':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('debateApiErrorsRoute'),
+                    userMessage: 'Internal server error: ' + errorObject.message,
+                    devMessage: errorObject
+                };
+                break;
+
+            case 'debateUnities-1':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('debateUnityApiErrorsRoute'),
+                    userMessage: 'The request body is incorrect.',
+                    devMessage: 'This resource spect a object in the body request.'
+                };
+                break;
+            case 'debateUnities-2':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('debateUnityApiErrorsRoute'),
+                    userMessage: 'Internal server error: ' + errorObject.message,
+                    devMessage: errorObject
+                };
+                break;                
         }
 
         return error;
