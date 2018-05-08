@@ -34,5 +34,12 @@ module.exports = app => {
                 res.json(content);
             })
     }
+
+    api.findByDate = (req, res) => {
+        mapModel
+            .find({ '$where': 'this.created.toJSON().slice(0, 10) == ' + '"' + req.params.mapDate + '"' })
+            .then(contents => res.json(contents), error => error => res.status(500).json(errorParser.parse('mapContent-1', error)));
+    };
+
     return api;
 }
