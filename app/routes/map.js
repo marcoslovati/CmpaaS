@@ -14,4 +14,8 @@ module.exports = app => {
     app
         .route('/v1/maps/:mapId/content')
         .post(authApi.authenticationRequired, api.createContent);
+
+    app
+        .route('/v1/maps/date/:mapDate')
+        .get(authApi.authenticationRequired, api.findByDate);
 }
