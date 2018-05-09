@@ -1,6 +1,23 @@
 var mongoose = require('mongoose');
 
 var schema = mongoose.Schema({
+    debate: {
+        _id: {
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'Debate'
+        },
+        name: {
+            type: String
+        },
+        link: {
+            rel: {
+                type: String
+            },
+            href: {
+                type: String
+            }
+        }
+    },
     mapContentInitial: [
         {
             _id: {
@@ -21,21 +38,21 @@ var schema = mongoose.Schema({
         }
     ],
     questioner1: {
-            _id: {
-                type: mongoose.Schema.Types.ObjectId, 
-                ref: 'User'
-            },
-            username: {
+        _id: {
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'User'
+        },
+        username: {
+            type: String
+        },
+        link: {
+            rel: {
                 type: String
             },
-            link: {
-                rel: {
-                    type: String
-                },
-                href: {
-                    type: String
-                }
+            href: {
+                type: String
             }
+        }
     },
     question1: {
         type: String

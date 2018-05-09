@@ -9,43 +9,46 @@ module.exports = app => {
         else {
             debateUnityModel
                 .create(req.body)
-                .then(debateUnity => {
-                    debateUnity.link = {
-                        rel: 'debateUnity',
-                        href: app.get('debateUnityApiRoute') + debateUnity._id
-                    };
-                    debate.save();
-                    userModel
-                        .findById(req.auth.user._id)
-                        .then(user => {
-                            user.debates = user.debates || [];
-                            user.debates.push(debate);
-                            user.save();
-                            res.status(201).json({
-                                userMessage: 'Debate created successfully. ',
-                                debate 
-                            });
-                        }, error => res.status(500).json(errorParser.parse('users-1', error)));
-                }, error => res.status(500).json(errorParser.parse('debates-2', error)));
+                .then(debateUnities => {
+                    debateUnities.forEach(element => {
+                        element.link = {
+                            rel: 'debateUnity',
+                            href: app.get('debateUnityApiRoute') + debateUnity._id
+                        };
+                        element.save();
+                    });
+                }, error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
         }
     };
 
-    api.list = (req, res) => {
-        debateModel
-            .find({})
-            .then(debates => res.json(debates), error => error => res.status(500).json(errorParser.parse('debates-2', error)));
+    api.update = (req, res) => {
+        if(!(Object.prototype.toString.call(req.body) === '[object Object]')) res.status(400).json(errorParser.parse('debateUnities-1', {}))
+        else {
+            debateUnities
+                .findByIdAndUpdate(req.params.id, req.body, { new: true })
+                .then(debateUnity => {
+                    if(!debateUnity) res.status(404).json(errorParser.parse('debateUnities-3', {}))
+                    else res.json({
+                            userMessage: 'The debate unity was updated. ', 
+                            alertMessage,    
+                            user
+                        });
+                }, error => {
+                    res.status(500).json(errorParser.parse('debateUnities-1', error));    
+                });
+        }
     };
 
-    api.findByCreator = (req, res) => {
-        debateModel
-            .find({'creator._id' : req.params.creatorId})
-            .then(debates => res.json(debates), error => error => res.status(500).json(errorParser.parse('debates-2', error)));
+    api.findByDebate = (req, res) => {
+        debateUnityModel
+            .find({'debate._id' : req.params.debateId})
+            .then(debateUnities => res.json(debateUnities), error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
     };
 
     api.findById = (req, res) => {
-        debateModel
-            .findById(req.params.debateId)
-            .then(debates => res.json(debates), error => error => res.status(500).json(errorParser.parse('debates-2', error)));
+        debateUnityModel
+            .findById(req.params.debateUnityId)
+            .then(debateUnity => res.json(debateUnity), error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
     };
 
     return api;

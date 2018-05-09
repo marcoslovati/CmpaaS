@@ -341,7 +341,15 @@ module.exports = app => {
                     userMessage: 'Internal server error: ' + errorObject.message,
                     devMessage: errorObject
                 };
-                break;                
+                break;
+            case 'debateUnities-3':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('debateUnityApiErrorsRoute'),
+                    userMessage: 'The request debate unity id was not found.',
+                    devMessage: 'Invalid debate unity ID.'
+                };
+                break;              
         }
 
         return error;
