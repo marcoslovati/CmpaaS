@@ -5,7 +5,7 @@ module.exports = app => {
     const errorParser = app.helpers.errorParser;
 
     api.create = (req, res) => {
-        if(!(Object.prototype.toString.call(req.body) === '[object Object]')) res.status(400).json(errorParser.parse('debateUnities-1', {}))
+        if(!Array.isArray(req.body)) res.status(400).json(errorParser.parse('debateUnities-1', {}))
         else {
             debateUnityModel
                 .create(req.body)
@@ -13,9 +13,13 @@ module.exports = app => {
                     debateUnities.forEach(element => {
                         element.link = {
                             rel: 'debateUnity',
-                            href: app.get('debateUnityApiRoute') + debateUnity._id
+                            href: app.get('debateUnityApiRoute') + element._id
                         };
                         element.save();
+                    });
+                    res.status(201).json({
+                        userMessage: 'Debate unities created successfully. ',
+                        debateUnities 
                     });
                 }, error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
         }

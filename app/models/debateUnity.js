@@ -18,7 +18,7 @@ var schema = mongoose.Schema({
             }
         }
     },
-    mapContentInitial: [
+    initialMapContent: [
         {
             _id: {
                 type: mongoose.Schema.Types.ObjectId, 
@@ -83,7 +83,7 @@ var schema = mongoose.Schema({
     question4: {
         type: String
     },
-    mapContentFinal: [
+    finalMapContent: [
         {
             _id: {
                 type: mongoose.Schema.Types.ObjectId, 
