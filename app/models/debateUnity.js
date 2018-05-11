@@ -18,32 +18,24 @@ var schema = mongoose.Schema({
             }
         }
     },
-    initialMapContent: [
-        {
-            _id: {
-                type: mongoose.Schema.Types.ObjectId, 
-                ref: 'MapContent'
+    initialMapContent: {
+        _id: {
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'MapContent'
+        },
+        link: {
+            rel: {
+                type: String
             },
-            created: {
-                type: Date
-            },
-            link: {
-                rel: {
-                    type: String
-                },
-                href: {
-                    type: String
-                }
+            href: {
+                type: String
             }
         }
-    ],
+    },
     questioner1: {
         _id: {
             type: mongoose.Schema.Types.ObjectId, 
             ref: 'User'
-        },
-        username: {
-            type: String
         },
         link: {
             rel: {
@@ -65,9 +57,6 @@ var schema = mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId, 
             ref: 'User'
         },
-        username: {
-            type: String
-        },
         link: {
             rel: {
                 type: String
@@ -83,25 +72,20 @@ var schema = mongoose.Schema({
     question4: {
         type: String
     },
-    finalMapContent: [
-        {
-            _id: {
-                type: mongoose.Schema.Types.ObjectId, 
-                ref: 'MapContent'
+    finalMapContent: {
+        _id: {
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'MapContent'
+        },
+        link: {
+            rel: {
+                type: String
             },
-            created: {
-                type: Date
-            },
-            link: {
-                rel: {
-                    type: String
-                },
-                href: {
-                    type: String
-                }
+            href: {
+                type: String
             }
         }
-    ],
+    },
     link: {
         rel: {
             type: String

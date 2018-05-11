@@ -40,7 +40,7 @@ module.exports = app => {
 
     api.findByCreator = (req, res) => {
         debateModel
-            .find({'creator._id' : req.params.creatorId})
+            .find({'creator._id' : "ObjectId('" + req.auth.user._id + "')"})
             .then(debates => res.json(debates), error => error => res.status(500).json(errorParser.parse('debates-2', error)));
     };
 

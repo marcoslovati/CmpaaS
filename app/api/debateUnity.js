@@ -15,6 +15,17 @@ module.exports = app => {
                             rel: 'debateUnity',
                             href: app.get('debateUnityApiRoute') + element._id
                         };
+
+                        element.debate.link = {
+                            rel: 'debate',
+                            href: app.get('debateApiRoute') + element.initialMapContent._id
+                        };
+
+                        element.initialMapContent.link = {
+                            rel: 'mapContent',
+                            href: app.get('mapContentApiRoute') + element.initialMapContent._id
+                        };
+
                         element.save();
                     });
                     res.status(201).json({
