@@ -32,15 +32,10 @@ module.exports = app => {
         }
     };
 
-    api.list = (req, res) => {
-        debateModel
-            .find({})
-            .then(debates => res.json(debates), error => error => res.status(500).json(errorParser.parse('debates-2', error)));
-    };
-
     api.findByCreator = (req, res) => {
+        var ObjectId = mongoose.Types.ObjectId;
         debateModel
-            .find({'creator._id' : "ObjectId('" + req.auth.user._id + "')"})
+            .find({ "creator._id": new ObjectId(req.auth.user._id) })
             .then(debates => res.json(debates), error => error => res.status(500).json(errorParser.parse('debates-2', error)));
     };
 

@@ -24,7 +24,7 @@ module.exports = app => {
                 .create(req.body)
                 .then(user => {
                     user.link = {
-                        rel: 'self',
+                        rel: 'user',
                         href: app.get('userApiRoute') + user._id
                     };
                     user.save();

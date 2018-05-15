@@ -4,14 +4,13 @@ module.exports = app => {
 
     app
         .route('/v1/debates')
-        .post(authApi.authenticationRequired, api.create)
-        .get(authApi.authenticationRequired, api.list);
+        .post(authApi.authenticationRequired, api.create);
+
+    app
+        .route('/v1/debates/creator')
+        .get(authApi.authenticationRequired, api.findByCreator);
 
     app
         .route('/v1/debates/:debateId')
-        .get(authApi.authenticationRequired, api.findById);
-        
-    app
-        .route('/v1/debates/creator')
-        .get(authApi.authenticationRequired, api.findByCreator);        
+        .get(authApi.authenticationRequired, api.findById);        
 }
