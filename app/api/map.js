@@ -48,8 +48,15 @@ module.exports = app => {
 
     api.findByDate = (req, res) => {
         mapModel
-            .find({ '$where': 'this.created.toJSON().slice(0, 10) == ' + '"' + req.params.mapDate + '"' })
-            .then(contents => res.json(contents), error => error => res.status(500).json(errorParser.parse('maps-1', error)));
+            .find({ '$where': 'this.created.toJSON().slice(0, 10) == ' + '"' + req.params.mapDate + '"', 'author._id':{'$ne':req.auth.user._id}})
+            .then(maps => res.json(maps), error => error => res.status(500).json(errorParser.parse('maps-1', error)));
+    };
+
+    api.findByAuthor = (req, res) => {
+        console.log('chegou o disco voador');
+        mapModel
+            .find({'author._id':req.auth.user._id})
+            .then(maps => res.json(maps), error => error => res.status(500).json(errorParser.parse('maps-1', error)));
     };
     
     api.createContent = (req, res) => {

@@ -16,6 +16,11 @@ module.exports = app => {
                         href: app.get('debateApiRoute') + debate._id
                     };
                     debate.creator = req.auth.user;
+                    debate.referenceMapContent.link = {
+                        rel: 'mapContent',
+                        href: app.get('mapContentApiRoute') + debate.referenceMapContent._id
+                    };
+
                     debate.save();
                     userModel
                         .findById(req.auth.user._id)

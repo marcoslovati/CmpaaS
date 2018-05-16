@@ -27,6 +27,36 @@ var schema = mongoose.Schema({
                 }
             }
     },
+    referenceMapContent:{
+        _id: {
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'MapContent'
+        },
+        link: {
+            rel: {
+                type: String
+            },
+            href: {
+                type: String
+            }
+        }
+    },
+    debateUnities:[
+        {
+            _id: {
+                type: mongoose.Schema.Types.ObjectId, 
+                ref: 'DebateUnity'
+            },
+            link: {
+                rel: {
+                    type: String
+                },
+                href: {
+                    type: String
+                }
+            },
+        }
+    ],
     link: {
         rel: {
             type: String
