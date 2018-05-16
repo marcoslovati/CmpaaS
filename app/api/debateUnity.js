@@ -2,6 +2,8 @@ module.exports = app => {
     const mongoose = require('mongoose');
     const api = {};
     const debateUnityModel = mongoose.model('DebateUnity');
+    const debateModel = mongoose.model('Debate');
+    const mapContentModel = mongoose.model('MapContent');
     const errorParser = app.helpers.errorParser;
 
     api.create = (req, res) => {
@@ -25,6 +27,14 @@ module.exports = app => {
                             rel: 'mapContent',
                             href: app.get('mapContentApiRoute') + element.initialMapContent._id
                         };
+
+                        debateModel
+                        .findById(element._id)
+                        .then(debate => {
+                            debate.debateUnities = debate.debateUnities || [];
+                            debate.debateUnities.push(element);
+                            debate.save();                            
+                        }, error => res.status(500).json(errorParser.parse('users-1', error)));
 
                         element.save();
                     });
@@ -54,10 +64,23 @@ module.exports = app => {
         }
     };
 
-    api.findByDebate = (req, res) => {
+    api.findByDebateAndProcess = (req, res) => {
+        var concepts = [];
         debateUnityModel
             .find({'debate._id' : req.params.debateId})
-            .then(debateUnities => res.json(debateUnities), error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
+            .then(debateUnities => {
+                debateUnities.forEach(element => {
+                    mapContentModel
+                    .findById(element.initialMapContent._id)
+                    .then(mapContent =>{
+                        mapContent.content.nodeDataArray.forEach(nodeData =>{
+                            if(!concepts.includes(nodeData.text))
+                                concepts.push(nodeData.text);
+                        });
+                    });
+                });                
+            },
+            error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
     };
 
     api.findById = (req, res) => {

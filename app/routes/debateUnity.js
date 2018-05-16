@@ -12,6 +12,6 @@ module.exports = app => {
         .post(authApi.authenticationRequired, api.update);
         
     app
-        .route('/v1/debateUnities/debate/:debateId')
-        .get(authApi.authenticationRequired, api.findByDebate);        
+        .route('/v1/debateUnities/process/debate/:debateId')
+        .get(authApi.authenticationRequired, api.findByDebateAndProcess);        
 }
