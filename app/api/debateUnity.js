@@ -1,5 +1,6 @@
 module.exports = app => {
     const mongoose = require('mongoose');
+    const computeEuclideanDistance = require('compute-euclidean-distance');
     const api = {};
     const debateUnityModel = mongoose.model('DebateUnity');
     const debateModel = mongoose.model('Debate');
@@ -28,16 +29,10 @@ module.exports = app => {
                             href: app.get('mapContentApiRoute') + element.initialMapContent._id
                         };
 
-                        debateModel
-                        .findById(element._id)
-                        .then(debate => {
-                            debate.debateUnities = debate.debateUnities || [];
-                            debate.debateUnities.push(element);
-                            debate.save();                            
-                        }, error => res.status(500).json(errorParser.parse('users-1', error)));
-
                         element.save();
-                    });
+                        
+                    }, error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
+
                     res.status(201).json({
                         userMessage: 'Debate unities created successfully. ',
                         debateUnities 
@@ -65,22 +60,56 @@ module.exports = app => {
     };
 
     api.findByDebateAndProcess = (req, res) => {
-        var concepts = [];
-        debateUnityModel
-            .find({'debate._id' : req.params.debateId})
-            .then(debateUnities => {
-                debateUnities.forEach(element => {
-                    mapContentModel
-                    .findById(element.initialMapContent._id)
-                    .then(mapContent =>{
-                        mapContent.content.nodeDataArray.forEach(nodeData =>{
-                            if(!concepts.includes(nodeData.text))
-                                concepts.push(nodeData.text);
+        var allConcepts = [];
+        var referenceMapConcepts = [];
+        var initialMapConcepts = [];
+
+        var weightedReference = [];
+        var weightedInitial = [];
+
+        debateModel
+            .findById(req.params.debateId)
+            .then(debate =>{
+                mapContentModel
+                .findById(debate.referenceMapContent._id)
+                .then(mapContent =>{
+                    referenceMapConcepts = mapToArray(mapContent);
+                    allConcepts = concatDiffer(allConcepts, referenceMapConcepts);
+
+                    debateUnityModel
+                    .find({'debate._id' : req.params.debateId})
+                    .then(debateUnities => {
+                        debateUnities.forEach(element => {
+                            mapContentModel
+                            .findById(element.initialMapContent._id)
+                            .then(mapContent =>{
+                                var mapConcepts = mapToArray(mapContent);
+
+                                initialMapConcepts.push({
+                                    "_id":element._id,
+                                    "mapConcepts": mapConcepts
+                                });
+                                allConcepts = concatDiffer(allConcepts, mapConcepts);
+                            });
                         });
+
+                        weightedReference = conceptArrayToBoolean(allConcepts, referenceMapConcepts);
+
+                        initialMapConcepts.forEach(element => {
+                            weightedInitial.push({
+                                "_id":element._id,
+                                "mapConcepts": conceptArrayToBoolean(allConcepts, element.mapConcepts)
+                            });
+                        });
+
+                        weightedInitial.forEach(element => {
+                            element.distance = computeEuclideanDistance.euclidean(weightedReference, element.mapConcepts);                            
+                            console.log(element.distance);
+                        });                       
+
                     });
-                });                
-            },
-            error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
+                });
+            },error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
     };
 
     api.findById = (req, res) => {
@@ -90,4 +119,33 @@ module.exports = app => {
     };
 
     return api;
+
+    function mapToArray(map){
+        var concepts = [];
+        map.content.nodeDataArray.forEach(nodeData =>{
+            if(!concepts.includes(nodeData.text))
+                concepts.push(nodeData.text);
+        });
+        return concepts;
+    }
+
+    function concatDiffer(allItems, newItems){
+        newItems.forEach(element =>{
+            if(!allItems.includes(element))
+                allItems.push(element);
+        });
+        return allItems;
+    }
+
+    function conceptArrayToBoolean(allConcepts, mapConcepts){
+        var weightedArray = [];
+        allConcepts.forEach(element => {
+            if(mapConcepts.includes(element))
+                weightedArray.push(1);
+            else
+                weightedArray.push(0);
+        });
+
+        return weightedArray;
+    }
 }

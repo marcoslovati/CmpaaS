@@ -41,22 +41,6 @@ var schema = mongoose.Schema({
             }
         }
     },
-    debateUnities:[
-        {
-            _id: {
-                type: mongoose.Schema.Types.ObjectId, 
-                ref: 'DebateUnity'
-            },
-            link: {
-                rel: {
-                    type: String
-                },
-                href: {
-                    type: String
-                }
-            },
-        }
-    ],
     link: {
         rel: {
             type: String
