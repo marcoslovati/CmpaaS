@@ -53,7 +53,6 @@ module.exports = app => {
     };
 
     api.findByAuthor = (req, res) => {
-        console.log('chegou o disco voador');
         mapModel
             .find({'author._id':req.auth.user._id})
             .then(maps => res.json(maps), error => error => res.status(500).json(errorParser.parse('maps-1', error)));

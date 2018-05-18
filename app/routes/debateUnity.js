@@ -9,9 +9,5 @@ module.exports = app => {
     app
         .route('/v1/debateUnities/:debateUnityId')
         .get(authApi.authenticationRequired, api.findById)
-        .post(authApi.authenticationRequired, api.update);
-        
-    app
-        .route('/v1/debateUnities/process/debate/:debateId')
-        .post(authApi.authenticationRequired, api.findByDebateAndProcess);        
+        .post(authApi.authenticationRequired, api.update);        
 }
