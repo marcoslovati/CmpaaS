@@ -2,6 +2,7 @@ module.exports = app => {
     const mongoose = require('mongoose');
     const api = {};
     const computeEuclideanDistance = require('compute-euclidean-distance');
+    const kmeans = require('node-kmeans');
     const promise = require("bluebird");
     const userModel = mongoose.model('User');
     const debateModel = mongoose.model('Debate');
@@ -78,53 +79,99 @@ module.exports = app => {
                     .then(debateUnities => {
                         var p = Promise.resolve();
 
-                        debateUnities.forEach((element) => {
+                        debateUnities.forEach((element, i, array) => {
                             p.then(new Promise(function(resolve){
                                 mapContentModel
                                 .findById(element.initialMapContent._id)
                                 .then(mapContent =>{
-                                    mapContent.on('end', function() {
-                                        console.log("passo");
-                                        var mapConcepts = mapToArray(mapContent);
+                                    console.log("passo " + mapContent._id);
+                                    var mapConcepts = mapToArray(mapContent);
+    
+                                    initialMapConcepts.push({
+                                        "_id":element._id,
+                                        "mapConcepts": mapConcepts
+                                    });
+    
+                                    allConcepts = concatDiffer(allConcepts, mapConcepts);
+                                    
+                                    resolve();
+                                });
+                            }).then(function(){
+                                if(i === array.length - 1){
+                                    console.log("agora sim");
+                                    weightedReference = conceptArrayToBoolean(allConcepts, referenceMapConcepts);
         
-                                        initialMapConcepts.push({
+                                    initialMapConcepts.forEach(element => {
+                                        weightedInitial.push({
                                             "_id":element._id,
-                                            "mapConcepts": mapConcepts
+                                            "mapConcepts": conceptArrayToBoolean(allConcepts, element.mapConcepts)
                                         });
-        
-                                        allConcepts = concatDiffer(allConcepts, mapConcepts);
+                                    });
 
-                                        resolve();
-                                   });
-                                });
+                                    var distances = [];
+
+                                    weightedInitial.forEach(element => {
+                                        element.distance = computeEuclideanDistance(weightedReference, element.mapConcepts);                            
+                                        distances.push([0, element.distance]);
+                                        console.log(element.distance);
+                                    });
+                                    
+                                    var p3 = Promise.resolve();
+                                    // for (let index = 2; index < distances.length; index++) {
+                                    var index = 4; // setando 4 clusters, mas teria que escolher pela qualidade da clusterização
+                                    p3.then(new Promise(function(resolve){
+                                        kmeans.clusterize(distances, {k: index}, (err,resp) => {
+                                            if (err) console.error(err);
+                                            else {
+                                                console.log(resp);
+
+                                                resp.sort(function(a, b){
+                                                    if(a.centroid[1] < b.centroid[1])
+                                                    return -1;
+                                                
+                                                    if(a.centroid[1] > b.centroid[1])
+                                                        return 1;
+                                                        
+                                                    return 0;
+                                                });
+
+                                                resp.forEach(el,ind => {
+                                                    if(ind === 0){
+                                                        
+                                                    }
+                                                });
+
+                                                console.log(resp);
+                                                resolve();                                                                                          
+                                            }
+                                        }); 
+                                    }).then(function(){
+                                        console.log('resposta');
+
+                                        res.json({
+                                            userMessage: 'Debate processed successfully. ',
+                                            weightedInitial 
+                                        });
+                                    }));                                   
+                                    // }                          
+
+                                }
                             }));
-                        });
-
-                        p.then(function(){
-                            console.log("agora sim");
-                            weightedReference = conceptArrayToBoolean(allConcepts, referenceMapConcepts);
-
-                            initialMapConcepts.forEach(element => {
-                                weightedInitial.push({
-                                    "_id":element._id,
-                                    "mapConcepts": conceptArrayToBoolean(allConcepts, element.mapConcepts)
-                                });
-                            });
-    
-                            weightedInitial.forEach(element => {
-                                element.distance = computeEuclideanDistance(weightedReference, element.mapConcepts);                            
-                                console.log(element.distance);
-                            });                                    
-    
-                            res.json({
-                                userMessage: 'Debate processed successfully. ',
-                                weightedInitial 
-                            });
-                        });                        
+                        });                       
                     });
                 });
             },error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
     };
+
+    function comparaClusters(a, b){
+        if(a.centroid[1] < b.centroid[1])
+            return -1;
+        
+        if(a.centroid[1] > b.centroid[1])
+            return 1;
+            
+        return 0;
+    }
 
     function mapToArray(map){
         var concepts = [];
