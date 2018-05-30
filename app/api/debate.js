@@ -10,6 +10,46 @@ module.exports = app => {
     const mapContentModel = mongoose.model('MapContent');    
     const errorParser = app.helpers.errorParser;
 
+    var comparaClusters = function (a, b){
+        if(a.centroid[1] < b.centroid[1])
+            return -1;
+        
+        if(a.centroid[1] > b.centroid[1])
+            return 1;
+            
+        return 0;
+    }
+
+    function mapToArray(map){
+        var concepts = [];
+        var content = JSON.parse(map.content);
+        content.nodeDataArray.forEach(nodeData =>{
+            if(!concepts.includes(nodeData.text))
+                concepts.push(nodeData.text);
+        });
+        return concepts;
+    }
+
+    function concatDiffer(allItems, newItems){
+        newItems.forEach(element =>{
+            if(!allItems.includes(element))
+                allItems.push(element);
+        });
+        return allItems;
+    }
+
+    function conceptArrayToBoolean(allConcepts, mapConcepts){
+        var weightedArray = [];
+        allConcepts.forEach(element => {
+            if(mapConcepts.includes(element))
+                weightedArray.push(1);
+            else
+                weightedArray.push(0);
+        });
+
+        return weightedArray;
+    }
+
     api.create = (req, res) => {
         if(!(Object.prototype.toString.call(req.body) === '[object Object]')) res.status(400).json(errorParser.parse('debates-1', {}))
         else {
@@ -125,19 +165,22 @@ module.exports = app => {
                                             else {
                                                 console.log(resp);
 
-                                                resp.sort(function(a, b){
-                                                    if(a.centroid[1] < b.centroid[1])
-                                                    return -1;
-                                                
-                                                    if(a.centroid[1] > b.centroid[1])
-                                                        return 1;
-                                                        
-                                                    return 0;
-                                                });
+                                                resp.sort(comparaClusters);
 
                                                 resp.forEach(el,ind => {
                                                     if(ind === 0){
-                                                        
+                                                        var clusterMapConcepts = [];
+                                                        el.clusterInd.forEach(element => {
+                                                            clusterMapConcepts.push(weightedInitial[ind].mapConcepts);
+                                                        });
+
+                                                        // setando 2 clusters, mas teria que escolher pela qualidade da clusterização
+                                                        kmeans.clusterize(clusterMapConcepts, {k: 2}, (err,resp) => {
+                                                            if (err) console.error(err);
+                                                            else {
+                                                                
+                                                            }
+                                                        });
                                                     }
                                                 });
 
@@ -162,46 +205,6 @@ module.exports = app => {
                 });
             },error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
     };
-
-    function comparaClusters(a, b){
-        if(a.centroid[1] < b.centroid[1])
-            return -1;
-        
-        if(a.centroid[1] > b.centroid[1])
-            return 1;
-            
-        return 0;
-    }
-
-    function mapToArray(map){
-        var concepts = [];
-        var content = JSON.parse(map.content);
-        content.nodeDataArray.forEach(nodeData =>{
-            if(!concepts.includes(nodeData.text))
-                concepts.push(nodeData.text);
-        });
-        return concepts;
-    }
-
-    function concatDiffer(allItems, newItems){
-        newItems.forEach(element =>{
-            if(!allItems.includes(element))
-                allItems.push(element);
-        });
-        return allItems;
-    }
-
-    function conceptArrayToBoolean(allConcepts, mapConcepts){
-        var weightedArray = [];
-        allConcepts.forEach(element => {
-            if(mapConcepts.includes(element))
-                weightedArray.push(1);
-            else
-                weightedArray.push(0);
-        });
-
-        return weightedArray;
-    }
 
     return api;
 }
