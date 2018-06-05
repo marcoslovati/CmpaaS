@@ -7,17 +7,22 @@ module.exports = app => {
     const userModel = mongoose.model('User');
     const debateModel = mongoose.model('Debate');
     const debateUnityModel = mongoose.model('DebateUnity');
-    const mapContentModel = mongoose.model('MapContent');    
+    const mapContentModel = mongoose.model('MapContent');
+    const mapModel = mongoose.model('Map');   
     const errorParser = app.helpers.errorParser;
 
-    var comparaClusters = function (a, b){
-        if(a.centroid[1] < b.centroid[1])
-            return -1;
+    // var comparaClusters = function (a, b){
+    //     if(a.centroid[1] < b.centroid[1])
+    //         return -1;
         
-        if(a.centroid[1] > b.centroid[1])
-            return 1;
+    //     if(a.centroid[1] > b.centroid[1])
+    //         return 1;
             
-        return 0;
+    //     return 0;
+    // }
+
+    var comparaClusters = function (a, b){
+        return a.distance < b.distance;
     }
 
     function mapToArray(map){
@@ -125,77 +130,94 @@ module.exports = app => {
                                 .findById(element.initialMapContent._id)
                                 .then(mapContent =>{
                                     console.log("passo " + mapContent._id);
-                                    var mapConcepts = mapToArray(mapContent);
+
+                                    mapModel
+                                    .findById(mapContent.map._id)
+                                    .then(map =>{
+                                        var mapConcepts = mapToArray(mapContent);
     
-                                    initialMapConcepts.push({
-                                        "_id":element._id,
-                                        "mapConcepts": mapConcepts
-                                    });
-    
-                                    allConcepts = concatDiffer(allConcepts, mapConcepts);
-                                    
-                                    resolve();
+                                        initialMapConcepts.push({
+                                            "debateUnity_id":element._id,
+                                            // "mapContent":mapContent,
+                                            "mapConcepts": mapConcepts,
+                                            "author":map.author
+                                        });
+        
+                                        allConcepts = concatDiffer(allConcepts, mapConcepts);
+                                        
+                                        resolve();
+                                    });                                    
                                 });
                             }).then(function(){
                                 if(i === array.length - 1){
                                     console.log("agora sim");
                                     weightedReference = conceptArrayToBoolean(allConcepts, referenceMapConcepts);
-        
-                                    initialMapConcepts.forEach(element => {
-                                        weightedInitial.push({
-                                            "_id":element._id,
-                                            "mapConcepts": conceptArrayToBoolean(allConcepts, element.mapConcepts)
-                                        });
+                                    
+                                    // var p2 = Promise.resolve();
+                                    initialMapConcepts.forEach(element => {                               
+                                        element.booleanArray = conceptArrayToBoolean(allConcepts, element.mapConcepts);
+                                        element.distance = computeEuclideanDistance(weightedReference, element.booleanArray);
                                     });
 
-                                    var distances = [];
+                                    initialMapConcepts.sort(comparaClusters);
 
-                                    weightedInitial.forEach(element => {
-                                        element.distance = computeEuclideanDistance(weightedReference, element.mapConcepts);                            
-                                        distances.push([0, element.distance]);
-                                        console.log(element.distance);
+                                    console.log(initialMapConcepts);
+
+                                    initialMapConcepts.forEach((element, i, array) => {
+                                        if(i === 0){
+                                            element.questioner1 = array[1].author._id;
+                                            element.questioner2 = array[2].author._id;
+                                        }
+                                        else if(i === 1){
+                                            element.questioner1 = array[0].author._id;
+                                            element.questioner2 = array[3].author._id;
+                                        }
+                                        else if(i === array.length - 1){
+                                            element.questioner1 = array[0].author._id;
+                                            element.questioner2 = array[3].author._id;
+                                        }
                                     });
                                     
-                                    var p3 = Promise.resolve();
+                                    // var p3 = Promise.resolve();
                                     // for (let index = 2; index < distances.length; index++) {
-                                    var index = 4; // setando 4 clusters, mas teria que escolher pela qualidade da clusterização
-                                    p3.then(new Promise(function(resolve){
-                                        kmeans.clusterize(distances, {k: index}, (err,resp) => {
-                                            if (err) console.error(err);
-                                            else {
-                                                console.log(resp);
+                                    // var index = 4; // setando 4 clusters, mas teria que escolher pela qualidade da clusterização
+                                    // p3.then(new Promise(function(resolve){
+                                    //     kmeans.clusterize(distances, {k: index}, (err,resp) => {
+                                    //         if (err) console.error(err);
+                                    //         else {
+                                    //             console.log(resp);
 
-                                                resp.sort(comparaClusters);
+                                    //             resp.sort(comparaClusters);
 
-                                                resp.forEach(el,ind => {
-                                                    if(ind === 0){
-                                                        var clusterMapConcepts = [];
-                                                        el.clusterInd.forEach(element => {
-                                                            clusterMapConcepts.push(weightedInitial[ind].mapConcepts);
-                                                        });
+                                    //             resp.forEach(el,ind => {
+                                    //                 if(ind === 0){
+                                    //                     var clusterMapConcepts = [];
+                                    //                     el.clusterInd.forEach(element => {
+                                    //                         clusterMapConcepts.push(weightedInitial[ind].mapConcepts);
+                                    //                     });
 
-                                                        // setando 2 clusters, mas teria que escolher pela qualidade da clusterização
-                                                        kmeans.clusterize(clusterMapConcepts, {k: 2}, (err,resp) => {
-                                                            if (err) console.error(err);
-                                                            else {
+                                    //                     // setando 2 clusters, mas teria que escolher pela qualidade da clusterização
+                                    //                     kmeans.clusterize(clusterMapConcepts, {k: 2}, (err,resp) => {
+                                    //                         if (err) console.error(err);
+                                    //                         else {
                                                                 
-                                                            }
-                                                        });
-                                                    }
-                                                });
+                                    //                         }
+                                    //                     });
+                                    //                 }
+                                    //             });
 
-                                                console.log(resp);
-                                                resolve();                                                                                          
-                                            }
-                                        }); 
-                                    }).then(function(){
+                                    //             console.log(resp);
+                                    //             resolve();                                                                                          
+                                    //         }
+                                    //     }); 
+                                    // }).then(function(){
                                         console.log('resposta');
 
                                         res.json({
                                             userMessage: 'Debate processed successfully. ',
                                             weightedInitial 
                                         });
-                                    }));                                   
+                                    // }));                                   
                                     // }                          
 
                                 }
