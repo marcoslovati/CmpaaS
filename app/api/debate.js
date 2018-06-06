@@ -21,7 +21,7 @@ module.exports = app => {
     //     return 0;
     // }
 
-    var comparaClusters = function (a, b){
+    var comparaDistancias = function (a, b){
         return a.distance < b.distance;
     }
 
@@ -106,7 +106,6 @@ module.exports = app => {
         var initialMapConcepts = [];
 
         var weightedReference = [];
-        var weightedInitial = [];
 
         console.log("findByIdAndProcess");
 
@@ -137,7 +136,7 @@ module.exports = app => {
                                         var mapConcepts = mapToArray(mapContent);
     
                                         initialMapConcepts.push({
-                                            "debateUnity_id":element._id,
+                                            "debateUnity":element,
                                             // "mapContent":mapContent,
                                             "mapConcepts": mapConcepts,
                                             "author":map.author
@@ -151,32 +150,123 @@ module.exports = app => {
                             }).then(function(){
                                 if(i === array.length - 1){
                                     console.log("agora sim");
-                                    weightedReference = conceptArrayToBoolean(allConcepts, referenceMapConcepts);
-                                    
-                                    // var p2 = Promise.resolve();
+                                    weightedReference = conceptArrayToBoolean(allConcepts, referenceMapConcepts);                                    
+
                                     initialMapConcepts.forEach(element => {                               
                                         element.booleanArray = conceptArrayToBoolean(allConcepts, element.mapConcepts);
                                         element.distance = computeEuclideanDistance(weightedReference, element.booleanArray);
                                     });
 
-                                    initialMapConcepts.sort(comparaClusters);
+                                    initialMapConcepts.sort(comparaDistancias);                                    
 
-                                    console.log(initialMapConcepts);
+                                    initialMapConcepts.forEach((element, idx, array) => {
+                                        if(idx === array.length - 1){
+                                            element.debateUnity.questioner1 = { 
+                                                "_id": array[idx - 1].author._id,
+                                                "link":{
+                                                    "rel": app.get('userApiRoute') + array[idx - 1].author._id,
+                                                    "href": "user"
+                                                }
+                                            };
 
-                                    initialMapConcepts.forEach((element, i, array) => {
-                                        if(i === 0){
-                                            element.questioner1 = array[1].author._id;
-                                            element.questioner2 = array[2].author._id;
-                                        }
-                                        else if(i === 1){
-                                            element.questioner1 = array[0].author._id;
-                                            element.questioner2 = array[3].author._id;
-                                        }
-                                        else if(i === array.length - 1){
-                                            element.questioner1 = array[0].author._id;
-                                            element.questioner2 = array[3].author._id;
+                                            element.debateUnity.questioner2 = { 
+                                                "_id": array[idx - 2].author._id,
+                                                "link":{
+                                                    "rel": app.get('userApiRoute') + array[idx - 2].author._id,
+                                                    "href": "user"
+                                                }
+                                            };
+                                        }else if(idx === array.length - 2){
+                                            element.debateUnity.questioner1 = { 
+                                                "_id": array[idx + 1].author._id,
+                                                "link":{
+                                                    "rel": app.get('userApiRoute') + array[idx + 1].author._id,
+                                                    "href": "user"
+                                                }
+                                            };
+
+                                            element.debateUnity.questioner2 = { 
+                                                "_id": array[idx - 2].author._id,
+                                                "link":{
+                                                    "rel": app.get('userApiRoute') + array[idx - 2].author._id,
+                                                    "href": "user"
+                                                }
+                                            };
+                                        }else if(idx === 0){
+                                            element.debateUnity.questioner1 = { 
+                                                "_id": array[1].author._id,
+                                                "link":{
+                                                    "rel": app.get('userApiRoute') + array[1].author._id,
+                                                    "href": "user"
+                                                }
+                                            };
+
+                                            element.debateUnity.questioner2 = { 
+                                                "_id": array[2].author._id,
+                                                "link":{
+                                                    "rel": app.get('userApiRoute') + array[2].author._id,
+                                                    "href": "user"
+                                                }
+                                            };
+                                        }else if(idx === 1){
+                                            element.debateUnity.questioner1 = { 
+                                                "_id": array[0].author._id,
+                                                "link":{
+                                                    "rel": app.get('userApiRoute') + array[0].author._id,
+                                                    "href": "user"
+                                                }
+                                            };
+
+                                            element.debateUnity.questioner2 = { 
+                                                "_id": array[3].author._id,
+                                                "link":{
+                                                    "rel": app.get('userApiRoute') + array[3].author._id,
+                                                    "href": "user"
+                                                }
+                                            };
+                                        }else{
+                                            element.debateUnity.questioner1 = { 
+                                                "_id": array[idx + 2].author._id,
+                                                "link":{
+                                                    "rel": app.get('userApiRoute') + array[idx + 2].author._id,
+                                                    "href": "user"
+                                                }
+                                            };
+
+                                            element.debateUnity.questioner2 = { 
+                                                "_id": array[idx - 2].author._id,
+                                                "link":{
+                                                    "rel": app.get('userApiRoute') + array[idx - 2].author._id,
+                                                    "href": "user"
+                                                }
+                                            };
                                         }
                                     });
+
+                                    // console.log(initialMapConcepts);
+
+                                    var p2 = Promise.resolve();
+
+                                    initialMapConcepts.forEach((element, ind, arrayInitial) => {
+                                        p2.then(new Promise(function(resolve2){
+                                            debateUnityModel
+                                            .findByIdAndUpdate(element.debateUnity._id, element.debateUnity, { new: true })
+                                            .then(updatedDebateUnity => {
+                                                console.log(updatedDebateUnity);
+
+                                                resolve2();
+                                            });
+                                        }).then(function(){
+                                            if(ind === arrayInitial.length - 1){
+                                                console.log('resposta');
+
+                                                res.json({
+                                                    userMessage: 'Debate processed successfully. ',
+                                                    initialMapConcepts 
+                                                });
+                                            }
+                                        }));
+                                    });                                    
                                     
                                     // var p3 = Promise.resolve();
                                     // for (let index = 2; index < distances.length; index++) {
@@ -210,13 +300,7 @@ module.exports = app => {
                                     //             resolve();                                                                                          
                                     //         }
                                     //     }); 
-                                    // }).then(function(){
-                                        console.log('resposta');
-
-                                        res.json({
-                                            userMessage: 'Debate processed successfully. ',
-                                            weightedInitial 
-                                        });
+                                    // }).then(function(){                                        
                                     // }));                                   
                                     // }                          
 
