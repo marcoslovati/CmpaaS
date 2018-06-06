@@ -7,7 +7,11 @@ module.exports = app => {
         .post(authApi.authenticationRequired, api.create);
 
     app
+        .route('/v1/debateUnities/questioner')
+        .get(authApi.authenticationRequired, api.findByQuestioner);
+
+    app
         .route('/v1/debateUnities/:debateUnityId')
         .get(authApi.authenticationRequired, api.findById)
-        .post(authApi.authenticationRequired, api.update);        
+        .post(authApi.authenticationRequired, api.update);
 }
