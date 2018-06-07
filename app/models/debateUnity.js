@@ -37,6 +37,9 @@ var schema = mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId, 
             ref: 'User'
         },
+        username: {
+            type: String
+        },
         link: {
             rel: {
                 type: String
@@ -56,6 +59,9 @@ var schema = mongoose.Schema({
         _id: {
             type: mongoose.Schema.Types.ObjectId, 
             ref: 'User'
+        },
+        username: {
+            type: String
         },
         link: {
             rel: {
