@@ -23,7 +23,7 @@ module.exports = app => {
                     userMessage: 'Map created successfully. ',
                     mapContent
                 });
-            }, error => res.status(500).json(errorParser.parse('maps-2', error)));
+            }, error => res.status(500).json(errorParser.parse('mapContent-2', error)));
     };
 
     api.getContent = (req, res) => {
@@ -33,6 +33,12 @@ module.exports = app => {
             .then(content => {
                 res.json(content);
             })
+    }
+
+    api.findById = (req, res) => {        
+        mapContentModel
+            .findById(req.params.mapContentId)
+            .then(mapContent => res.json(mapContent), error => error => res.status(500).json(errorParser.parse('mapContent-2', error)));
     }
 
     return api;
