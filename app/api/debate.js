@@ -161,98 +161,35 @@ module.exports = app => {
 
                                     initialMapConcepts.forEach((element, idx, array) => {
                                         if(idx === array.length - 1){
-                                            element.debateUnity.questioner1 = { 
-                                                "_id": array[idx - 1].author._id,
-                                                "link":{
-                                                    "rel": app.get('userApiRoute') + array[idx - 1].author._id,
-                                                    "href": "user"
-                                                }
-                                            };
-
-                                            element.debateUnity.questioner2 = { 
-                                                "_id": array[idx - 2].author._id,
-                                                "link":{
-                                                    "rel": app.get('userApiRoute') + array[idx - 2].author._id,
-                                                    "href": "user"
-                                                }
-                                            };
+                                            element.debateUnity.questioner1 = array[idx - 1].author;
+                                            element.debateUnity.questioner2 = array[idx - 2].author;
                                         }else if(idx === array.length - 2){
-                                            element.debateUnity.questioner1 = { 
-                                                "_id": array[idx + 1].author._id,
-                                                "link":{
-                                                    "rel": app.get('userApiRoute') + array[idx + 1].author._id,
-                                                    "href": "user"
-                                                }
-                                            };
-
-                                            element.debateUnity.questioner2 = { 
-                                                "_id": array[idx - 2].author._id,
-                                                "link":{
-                                                    "rel": app.get('userApiRoute') + array[idx - 2].author._id,
-                                                    "href": "user"
-                                                }
-                                            };
+                                            element.debateUnity.questioner1 = array[idx + 1].author;
+                                            element.debateUnity.questioner2 = array[idx - 2].author;
                                         }else if(idx === 0){
-                                            element.debateUnity.questioner1 = { 
-                                                "_id": array[1].author._id,
-                                                "link":{
-                                                    "rel": app.get('userApiRoute') + array[1].author._id,
-                                                    "href": "user"
-                                                }
-                                            };
-
-                                            element.debateUnity.questioner2 = { 
-                                                "_id": array[2].author._id,
-                                                "link":{
-                                                    "rel": app.get('userApiRoute') + array[2].author._id,
-                                                    "href": "user"
-                                                }
-                                            };
+                                            element.debateUnity.questioner1 = array[1].author;
+                                            element.debateUnity.questioner2 = array[2].author;
                                         }else if(idx === 1){
-                                            element.debateUnity.questioner1 = { 
-                                                "_id": array[0].author._id,
-                                                "link":{
-                                                    "rel": app.get('userApiRoute') + array[0].author._id,
-                                                    "href": "user"
-                                                }
-                                            };
-
-                                            element.debateUnity.questioner2 = { 
-                                                "_id": array[3].author._id,
-                                                "link":{
-                                                    "rel": app.get('userApiRoute') + array[3].author._id,
-                                                    "href": "user"
-                                                }
-                                            };
+                                            element.debateUnity.questioner1 = array[0].author;
+                                            element.debateUnity.questioner2 = array[3].author;
                                         }else{
-                                            element.debateUnity.questioner1 = { 
-                                                "_id": array[idx + 2].author._id,
-                                                "link":{
-                                                    "rel": app.get('userApiRoute') + array[idx + 2].author._id,
-                                                    "href": "user"
-                                                }
-                                            };
-
-                                            element.debateUnity.questioner2 = { 
-                                                "_id": array[idx - 2].author._id,
-                                                "link":{
-                                                    "rel": app.get('userApiRoute') + array[idx - 2].author._id,
-                                                    "href": "user"
-                                                }
-                                            };
+                                            element.debateUnity.questioner1 = array[idx + 2].author;
+                                            element.debateUnity.questioner2 = array[idx - 2].author;
                                         }
                                     });
 
-                                    // console.log(initialMapConcepts);
+                                    console.log(initialMapConcepts);
 
                                     var p2 = Promise.resolve();
+
+                                    var updatedDebateUnities = [];
 
                                     initialMapConcepts.forEach((element, ind, arrayInitial) => {
                                         p2.then(new Promise(function(resolve2){
                                             debateUnityModel
                                             .findByIdAndUpdate(element.debateUnity._id, element.debateUnity, { new: true })
                                             .then(updatedDebateUnity => {
-                                                console.log(updatedDebateUnity);
+                                                updatedDebateUnities.push(updatedDebateUnity);
 
                                                 resolve2();
                                             });
@@ -262,7 +199,7 @@ module.exports = app => {
 
                                                 res.json({
                                                     userMessage: 'Debate processed successfully. ',
-                                                    initialMapConcepts 
+                                                    updatedDebateUnities 
                                                 });
                                             }
                                         }));
