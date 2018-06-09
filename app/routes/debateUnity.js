@@ -14,4 +14,8 @@ module.exports = app => {
         .route('/v1/debateUnities/:debateUnityId')
         .get(authApi.authenticationRequired, api.findById)
         .post(authApi.authenticationRequired, api.update);
+
+    app
+        .route('/v1/debateUnities/questions')
+        .post(authApi.authenticationRequired, api.updateQuestions);
 }

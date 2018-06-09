@@ -38,11 +38,26 @@ module.exports = app => {
         }
     };
 
-    api.update = (req, res) => {
+    api.updateQuestions = (req, res) => {
         if(!(Object.prototype.toString.call(req.body) === '[object Object]')) res.status(400).json(errorParser.parse('debateUnities-1', {}))
         else {
-            debateUnities
-                .findByIdAndUpdate(req.params.id, req.body, { new: true })
+            var debateUnity;
+            if(req.auth.user._id !== req.body.debateUnity.questioner1._id &&
+                req.auth.user._id !== req.body.debateUnity.questioner2._id){
+                    res.status(400).json(errorParser.parse('debateUnities-4', error));
+            }
+            else{
+                if(req.auth.user._id === req.body.debateUnity.questioner1._id){
+                    debateUnity.question1 = req.body.question1;
+                    debateUnity.question2 = req.body.question2;
+                }
+                else {
+                    debateUnity.question3 = req.body.question1;
+                    debateUnity.question4 = req.body.question2;
+                }
+
+                debateUnities
+                .findByIdAndUpdate(req.params.id, debateUnity, { new: true })
                 .then(debateUnity => {
                     if(!debateUnity) res.status(404).json(errorParser.parse('debateUnities-3', {}))
                     else res.json({
@@ -52,7 +67,10 @@ module.exports = app => {
                         });
                 }, error => {
                     res.status(500).json(errorParser.parse('debateUnities-1', error));    
-                });
+                }); 
+            }
+
+
         }
     };
 

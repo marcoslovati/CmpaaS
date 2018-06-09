@@ -349,7 +349,15 @@ module.exports = app => {
                     userMessage: 'The request debate unity id was not found.',
                     devMessage: 'Invalid debate unity ID.'
                 };
-                break;              
+                break;
+            case 'debateUnities-4':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('debateUnityApiErrorsRoute'),
+                    userMessage: 'The user is not able to question this debate unity.',
+                    devMessage: 'Invalid user questioner.'
+                };
+                break;           
         }
 
         return error;
