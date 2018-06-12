@@ -18,6 +18,23 @@ var schema = mongoose.Schema({
             }
         }
     },
+    mapsAuthor: {
+        _id: {
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'User'
+        },
+        username: {
+            type: String
+        },
+        link: {
+            rel: {
+                type: String
+            },
+            href: {
+                type: String
+            }
+        }
+    },
     initialMapContent: {
         _id: {
             type: mongoose.Schema.Types.ObjectId, 

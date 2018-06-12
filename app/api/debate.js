@@ -134,12 +134,13 @@ module.exports = app => {
                                     .findById(mapContent.map._id)
                                     .then(map =>{
                                         var mapConcepts = mapToArray(mapContent);
-    
+                                        
+                                        element.mapsAuthor = map.author;
+
                                         initialMapConcepts.push({
                                             "debateUnity":element,
                                             // "mapContent":mapContent,
-                                            "mapConcepts": mapConcepts,
-                                            "author":map.author
+                                            "mapConcepts": mapConcepts
                                         });
         
                                         allConcepts = concatDiffer(allConcepts, mapConcepts);
@@ -161,20 +162,20 @@ module.exports = app => {
 
                                     initialMapConcepts.forEach((element, idx, array) => {
                                         if(idx === array.length - 1){
-                                            element.debateUnity.questioner1 = array[idx - 1].author;
-                                            element.debateUnity.questioner2 = array[idx - 2].author;
+                                            element.debateUnity.questioner1 = array[idx - 1].debateUnity.author;
+                                            element.debateUnity.questioner2 = array[idx - 2].debateUnity.author;
                                         }else if(idx === array.length - 2){
-                                            element.debateUnity.questioner1 = array[idx + 1].author;
-                                            element.debateUnity.questioner2 = array[idx - 2].author;
+                                            element.debateUnity.questioner1 = array[idx + 1].debateUnity.author;
+                                            element.debateUnity.questioner2 = array[idx - 2].debateUnity.author;
                                         }else if(idx === 0){
-                                            element.debateUnity.questioner1 = array[1].author;
-                                            element.debateUnity.questioner2 = array[2].author;
+                                            element.debateUnity.questioner1 = array[1].debateUnity.author;
+                                            element.debateUnity.questioner2 = array[2].debateUnity.author;
                                         }else if(idx === 1){
-                                            element.debateUnity.questioner1 = array[0].author;
-                                            element.debateUnity.questioner2 = array[3].author;
+                                            element.debateUnity.questioner1 = array[0].debateUnity.author;
+                                            element.debateUnity.questioner2 = array[3].debateUnity.author;
                                         }else{
-                                            element.debateUnity.questioner1 = array[idx + 2].author;
-                                            element.debateUnity.questioner2 = array[idx - 2].author;
+                                            element.debateUnity.questioner1 = array[idx + 2].debateUnity.author;
+                                            element.debateUnity.questioner2 = array[idx - 2].debateUnity.author;
                                         }
                                     });
 

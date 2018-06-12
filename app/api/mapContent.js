@@ -13,6 +13,9 @@ module.exports = app => {
                     rel: 'mapContent',
                     href: app.get('mapContentApiRoute') + mapContent._id
                 };
+
+                mapContent.save();
+                
                 mapModel
                     .findById(req.body.map._id)
                     .then(map => {

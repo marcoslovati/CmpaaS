@@ -11,6 +11,10 @@ module.exports = app => {
         .get(authApi.authenticationRequired, api.findByQuestioner);
 
     app
+        .route('/v1/debateUnities/author')
+        .get(authApi.authenticationRequired, api.findByAuthor);        
+
+    app
         .route('/v1/debateUnities/:debateUnityId')
         .get(authApi.authenticationRequired, api.findById);
 

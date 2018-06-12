@@ -84,7 +84,17 @@ module.exports = app => {
         .find({$or: [{"questioner1._id": id }, {"questioner2._id": id }]})
         .then(debateUnities => {
             res.json(debateUnities);
-        }, error => res.status(500).json(errorParser.parse('users-1', error)));
+        }, error => res.status(500).json(errorParser.parse('debateUnities-1', error)));
+    };
+
+    api.findByAuthor = (req, res) => {
+        var id = new mongoose.Types.ObjectId(req.auth.user._id);
+
+        debateUnityModel
+        .find({'mapsAuthor._id': id})
+        .then(debateUnities => {
+            res.json(debateUnities);
+        }, error => res.status(500).json(errorParser.parse('debateUnities-1', error)));
     };
 
     return api;
