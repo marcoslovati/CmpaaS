@@ -4,7 +4,8 @@ module.exports = app => {
 
     app
         .route('/v1/debateUnities')
-        .post(authApi.authenticationRequired, api.create);
+        .post(authApi.authenticationRequired, api.create)
+        .put(authApi.authenticationRequired, api.update);
 
     app
         .route('/v1/debateUnities/questioner')

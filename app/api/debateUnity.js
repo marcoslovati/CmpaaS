@@ -71,6 +71,23 @@ module.exports = app => {
         }
     };
 
+    api.update = (req, res) => {
+        if(!(Object.prototype.toString.call(req.body) === '[object Object]')) res.status(400).json(errorParser.parse('debateUnities-1', {}))
+        else {
+            debateUnityModel
+            .findByIdAndUpdate(req.body._id, req.body, { new: true })
+            .then(debateUnity => {
+                if(!debateUnity) res.status(404).json(errorParser.parse('debateUnities-2', {}))
+                else res.json({
+                        userMessage: 'The debate unity was updated. ',                                 
+                        debateUnity
+                    });
+            }, error => {
+                res.status(500).json(errorParser.parse('debateUnities-1', error));    
+            }); 
+        }
+    };
+
     api.findById = (req, res) => {
         debateUnityModel
             .findById(req.params.debateUnityId)
