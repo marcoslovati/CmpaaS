@@ -15,6 +15,10 @@ module.exports = app => {
         .get(authApi.authenticationRequired, api.findById);
         
     app
-        .route('/v1/debates/process/debate/:debateId')
-        .post(authApi.authenticationRequired, api.findByIdAndProcess);
+        .route('/v1/debates/processInitial/debate/:debateId')
+        .post(authApi.authenticationRequired, api.findByIdAndProcessInitial);
+
+    app
+        .route('/v1/debates/processFinal/debate/:debateId')
+        .post(authApi.authenticationRequired, api.findByIdAndProcessFinal);
 }

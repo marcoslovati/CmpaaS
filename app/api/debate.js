@@ -22,7 +22,7 @@ module.exports = app => {
     // }
 
     var comparaDistancias = function (a, b){
-        return a.distance < b.distance;
+        return a.debateUnity.initialDistance < b.debateUnity.initialDistance;
     }
 
     function mapToArray(map){
@@ -100,7 +100,7 @@ module.exports = app => {
             .then(debates => res.json(debates), error => error => res.status(500).json(errorParser.parse('debates-2', error)));
     };
 
-    api.findByIdAndProcess = (req, res) => {
+    api.findByIdAndProcessInitial = (req, res) => {
         var allConcepts = [];
         var referenceMapConcepts = [];
         var initialMapConcepts = [];
@@ -155,7 +155,7 @@ module.exports = app => {
 
                                     initialMapConcepts.forEach(element => {                               
                                         element.booleanArray = conceptArrayToBoolean(allConcepts, element.mapConcepts);
-                                        element.distance = computeEuclideanDistance(weightedReference, element.booleanArray);
+                                        element.debateUnity.initialDistance = computeEuclideanDistance(weightedReference, element.booleanArray);
                                     });
 
                                     initialMapConcepts.sort(comparaDistancias);                                    
@@ -249,6 +249,134 @@ module.exports = app => {
                 });
             },error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
     };
+
+    api.findByIdAndProcessFinal = (req, res) => {
+        var allConcepts = [];
+        var referenceMapConcepts = [];
+        var finalMapConcepts = [];
+
+        var weightedReference = [];
+
+        console.log("findByIdAndProcess");
+
+        debateModel
+            .findById(req.params.debateId)
+            .then(debate =>{
+                mapContentModel
+                .findById(debate.referenceMapContent._id)
+                .then(mapContent =>{                    
+                    referenceMapConcepts = mapToArray(mapContent);
+                    allConcepts = concatDiffer(allConcepts, referenceMapConcepts);
+
+                    debateUnityModel
+                    .find({'debate._id' : req.params.debateId})
+                    .then(debateUnities => {
+                        var p = Promise.resolve();
+
+                        debateUnities.forEach((element, i, array) => {
+                            p.then(new Promise(function(resolve){
+                                mapContentModel
+                                .findById(element.finalMapContent._id)
+                                .then(mapContent =>{
+                                    console.log("passo " + mapContent._id);
+
+                                    mapModel
+                                    .findById(mapContent.map._id)
+                                    .then(map =>{
+                                        var mapConcepts = mapToArray(mapContent);
+                                        
+                                        element.mapsAuthor = map.author;
+
+                                        finalMapConcepts.push({
+                                            "debateUnity":element,
+                                            "mapConcepts": mapConcepts
+                                        });
+        
+                                        allConcepts = concatDiffer(allConcepts, mapConcepts);
+                                        
+                                        resolve();
+                                    });                                    
+                                });
+                            }).then(function(){
+                                if(i === array.length - 1){
+                                    console.log("agora sim");
+                                    weightedReference = conceptArrayToBoolean(allConcepts, referenceMapConcepts);                                    
+
+                                    finalMapConcepts.forEach(element => {                               
+                                        element.booleanArray = conceptArrayToBoolean(allConcepts, element.mapConcepts);
+                                        element.debateUnity.finalDistance = computeEuclideanDistance(weightedReference, element.booleanArray);
+                                    });
+
+                                    console.log(finalMapConcepts);
+
+                                    var p2 = Promise.resolve();
+
+                                    var updatedDebateUnities = [];
+
+                                    finalMapConcepts.forEach((element, ind, arrayFinal) => {
+                                        p2.then(new Promise(function(resolve2){
+                                            debateUnityModel
+                                            .findByIdAndUpdate(element.debateUnity._id, element.debateUnity, { new: true })
+                                            .then(updatedDebateUnity => {
+                                                updatedDebateUnities.push(updatedDebateUnity);
+
+                                                resolve2();
+                                            });
+                                        }).then(function(){
+                                            if(ind === arrayFinal.length - 1){
+                                                console.log('resposta');
+
+                                                res.json({
+                                                    userMessage: 'Debate processed successfully. ',
+                                                    updatedDebateUnities 
+                                                });
+                                            }
+                                        }));
+                                    });                                    
+                                    
+                                    // var p3 = Promise.resolve();
+                                    // for (let index = 2; index < distances.length; index++) {
+                                    // var index = 4; // setando 4 clusters, mas teria que escolher pela qualidade da clusterização
+                                    // p3.then(new Promise(function(resolve){
+                                    //     kmeans.clusterize(distances, {k: index}, (err,resp) => {
+                                    //         if (err) console.error(err);
+                                    //         else {
+                                    //             console.log(resp);
+
+                                    //             resp.sort(comparaClusters);
+
+                                    //             resp.forEach(el,ind => {
+                                    //                 if(ind === 0){
+                                    //                     var clusterMapConcepts = [];
+                                    //                     el.clusterInd.forEach(element => {
+                                    //                         clusterMapConcepts.push(weightedInitial[ind].mapConcepts);
+                                    //                     });
+
+                                    //                     // setando 2 clusters, mas teria que escolher pela qualidade da clusterização
+                                    //                     kmeans.clusterize(clusterMapConcepts, {k: 2}, (err,resp) => {
+                                    //                         if (err) console.error(err);
+                                    //                         else {
+                                                                
+                                    //                         }
+                                    //                     });
+                                    //                 }
+                                    //             });
+
+                                    //             console.log(resp);
+                                    //             resolve();                                                                                          
+                                    //         }
+                                    //     }); 
+                                    // }).then(function(){                                        
+                                    // }));                                   
+                                    // }                          
+
+                                }
+                            }));
+                        });                       
+                    });
+                });
+            },error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
+    };    
 
     return api;
 }
