@@ -14,6 +14,10 @@ module.exports = (app) => {
         .get(api.findById)
         .put(api.update)
         .delete(api.removeById);
+
+    app
+        .route('/v1/groups/admin/:adminId')
+        .get(api.findByAdmin);        
     
     app
         .route('/v1/groups/:groupId/include')

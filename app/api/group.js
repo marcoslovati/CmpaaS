@@ -102,6 +102,18 @@ module.exports = app => {
             });
     };
 
+    api.findByAdmin = (req, res) => {
+        groupModel
+            .find({'admin._id': req.params.adminId})
+            .then(groups => {
+                if(!groups) res.status(404).json(errorParser.parse('groups-1', {}));
+                else res.json(groups);
+            }, error => {
+                    if(error.name == "CastError") res.status(400).json(errorParser.parse('groups-2', error));
+                    else res.status(500).json(errorParser.parse('groups-3', error));
+            });
+    };
+
     api.update = (req, res) => {
         if(!(Object.prototype.toString.call(req.body) === '[object Object]')) res.status(400).json(errorParser.parse('groups-8', {}))
         else {
