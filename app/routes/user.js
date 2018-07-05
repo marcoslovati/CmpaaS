@@ -29,6 +29,10 @@ module.exports = app => {
         .get(api.findById)
         .put(api.update)
         .delete(api.removeById);
+
+    app
+        .route('/v1/users/name/:name')
+        .get(api.findByName);
     
     app
         .route('/v1/users/:id/join/:groupId')

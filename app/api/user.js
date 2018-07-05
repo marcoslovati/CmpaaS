@@ -110,6 +110,18 @@ module.exports = app => {
             });
     };
 
+    api.findByName = (req, res) => {
+        userModel
+            .find({name: new RegExp('^'+req.params.name+'$', "i")})
+            .then(users => {
+                if(!users) res.status(404).json(errorParser.parse('users-7', {}))
+                else res.json(users);
+            }, error => {
+                if(error.name == "CastError") res.status(400).json(errorParser.parse('users-5', error))
+                else res.status(500).json(errorParser.parse('users-1', error)); 
+            });
+    };
+
     api.update = (req, res) => {
         if(!(Object.prototype.toString.call(req.body) === '[object Object]')) res.status(400).json(errorParser.parse('users-10', {}))
         else {
