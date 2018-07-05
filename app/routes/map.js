@@ -21,5 +21,5 @@ module.exports = app => {
 
     app
         .route('/v1/maps/date/:mapDate')
-        .get(authApi.authenticationRequired, api.findByDate);
+        .post(authApi.authenticationRequired, api.findByDate);
 }
