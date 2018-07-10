@@ -31,6 +31,10 @@ module.exports = app => {
         .delete(api.removeById);
 
     app
+        .route('/v1/users/:id/isOfAdministratorsGroup')
+        .get(api.isOfAdministratorsGroup);
+
+    app
         .route('/v1/users/name/:name')
         .get(api.findByName);
     

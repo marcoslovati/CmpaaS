@@ -122,6 +122,26 @@ module.exports = app => {
             });
     };
 
+    api.isOfAdministratorsGroup = (req, res) => {
+        let admGroupName = app.get('adminGroupName');
+        groupModel
+            .findOne({name: admGroupName})
+            .then(group => {
+                if(!group) res.status(404).json(errorParser.parse('groups-1', {}))
+                else {
+                    console.log(group.users);
+                    if(!group.users) res.json(false);
+                    else {
+                        let user = group.users.filter(user => (user.id === req.params.id));
+                        console.log(user);                       
+                        res.json(user.length > 0);
+                    }
+                }
+            }, error => {
+                res.status(500).json(errorParser.parse('groups-2', error)); 
+            });
+    };
+
     api.update = (req, res) => {
         if(!(Object.prototype.toString.call(req.body) === '[object Object]')) res.status(400).json(errorParser.parse('users-10', {}))
         else {
