@@ -30,7 +30,7 @@ app.use(function (req, res, next) {
 
 app.set('secret', 'Cmp@asUf3s');
 
-app.set('adminGroupName', 'Administrators');
+app.set('adminGroupName', 'Administradores');
 app.set('userApiRoute', '/v1/users/');
 app.set('userApiErrorsRoute', '/v1/errors/users/');
 app.set('groupApiRoute', '/v1/groups/');
