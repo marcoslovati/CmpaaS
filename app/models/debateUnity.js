@@ -75,9 +75,6 @@ var schema = mongoose.Schema({
     question2: {
         type: String
     },
-    initialDistance:{
-        type: Number
-    },
     questioner2: {
         _id: {
             type: mongoose.Schema.Types.ObjectId, 
@@ -115,7 +112,7 @@ var schema = mongoose.Schema({
             }
         }
     },
-    initialDistance:{
+    finalDistance:{
         type: Number
     },
     link: {
