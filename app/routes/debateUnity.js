@@ -13,7 +13,11 @@ module.exports = app => {
 
     app
         .route('/v1/debateUnities/author')
-        .get(authApi.authenticationRequired, api.findByAuthor);        
+        .get(authApi.authenticationRequired, api.findByAuthor);
+
+    app
+        .route('/v1/debateUnities/debate/:debateId')
+        .get(authApi.authenticationRequired, api.findByDebate);  
 
     app
         .route('/v1/debateUnities/:debateUnityId')

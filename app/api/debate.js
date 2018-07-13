@@ -278,7 +278,6 @@ module.exports = app => {
                                 mapContentModel
                                 .findById(element.finalMapContent._id)
                                 .then(mapContent =>{
-                                    console.log("passo " + mapContent._id);
 
                                     mapModel
                                     .findById(mapContent.map._id)

@@ -114,5 +114,13 @@ module.exports = app => {
         }, error => res.status(500).json(errorParser.parse('debateUnities-1', error)));
     };
 
+    api.findByDebate = (req, res) => {
+        debateUnityModel
+        .find({'debate._id': req.params.debateId})
+        .then(debateUnities => {
+            res.json(debateUnities);
+        }, error => res.status(500).json(errorParser.parse('debateUnities-1', error)));
+    };    
+
     return api;
 }
