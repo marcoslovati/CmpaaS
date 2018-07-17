@@ -162,20 +162,20 @@ module.exports = app => {
 
                                     initialMapConcepts.forEach((element, idx, array) => {
                                         if(idx === array.length - 1){
-                                            element.debateUnity.questioner1 = array[idx - 1].debateUnity.author;
-                                            element.debateUnity.questioner2 = array[idx - 2].debateUnity.author;
+                                            element.debateUnity.questioner1 = array[idx - 1].debateUnity.mapsAuthor;
+                                            element.debateUnity.questioner2 = array[idx - 2].debateUnity.mapsAuthor;
                                         }else if(idx === array.length - 2){
-                                            element.debateUnity.questioner1 = array[idx + 1].debateUnity.author;
-                                            element.debateUnity.questioner2 = array[idx - 2].debateUnity.author;
+                                            element.debateUnity.questioner1 = array[idx + 1].debateUnity.mapsAuthor;
+                                            element.debateUnity.questioner2 = array[idx - 2].debateUnity.mapsAuthor;
                                         }else if(idx === 0){
-                                            element.debateUnity.questioner1 = array[1].debateUnity.author;
-                                            element.debateUnity.questioner2 = array[2].debateUnity.author;
+                                            element.debateUnity.questioner1 = array[1].debateUnity.mapsAuthor;
+                                            element.debateUnity.questioner2 = array[2].debateUnity.mapsAuthor;
                                         }else if(idx === 1){
-                                            element.debateUnity.questioner1 = array[0].debateUnity.author;
-                                            element.debateUnity.questioner2 = array[3].debateUnity.author;
+                                            element.debateUnity.questioner1 = array[0].debateUnity.mapsAuthor;
+                                            element.debateUnity.questioner2 = array[3].debateUnity.mapsAuthor;
                                         }else{
-                                            element.debateUnity.questioner1 = array[idx + 2].debateUnity.author;
-                                            element.debateUnity.questioner2 = array[idx - 2].debateUnity.author;
+                                            element.debateUnity.questioner1 = array[idx + 2].debateUnity.mapsAuthor;
+                                            element.debateUnity.questioner2 = array[idx - 2].debateUnity.mapsAuthor;
                                         }
                                     });
 
