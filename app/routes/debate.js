@@ -15,10 +15,18 @@ module.exports = app => {
         .get(authApi.authenticationRequired, api.findById);
         
     app
-        .route('/v1/debates/processInitial/debate/:debateId')
-        .post(authApi.authenticationRequired, api.findByIdAndProcessInitial);
+        .route('/v1/debates/processLevelsInitial/debate/:debateId')
+        .post(authApi.authenticationRequired, api.findByIdAndProcessLevelsInitial);
 
     app
-        .route('/v1/debates/processFinal/debate/:debateId')
-        .post(authApi.authenticationRequired, api.findByIdAndProcessFinal);
+        .route('/v1/debates/processLevelsFinal/debate/:debateId')
+        .post(authApi.authenticationRequired, api.findByIdAndProcessLevelsFinal);
+
+    app
+        .route('/v1/debates/processClustersInitial/debate/:debateId')
+        .post(authApi.authenticationRequired, api.findByIdAndProcessClustersInitial);
+
+    app
+        .route('/v1/debates/processClustersFinal/debate/:debateId')
+        .post(authApi.authenticationRequired, api.findByIdAndProcessClustersFinal);
 }
