@@ -25,6 +25,10 @@ module.exports = app => {
         return a.debateUnity.initialDistance < b.debateUnity.initialDistance;
     }
 
+    var comparaDistancias2 = function (a, b){
+        return a[1] < b[1];
+    }
+
     function mapToArray(map){
         var concepts = [];
         var content = JSON.parse(map.content);
@@ -380,12 +384,20 @@ module.exports = app => {
         var allConcepts = [];
         var referenceMapConcepts = [];
         var initialMapConcepts = [];
-
+        var booleanArrays = [];
         var weightedReference = [];
 
+        console.log("findByIdAndProcess");
+
         debateModel
-            .findById(req.params.debateId)
-            .then(debate =>{
+        .findById(req.params.debateId)
+        .then(debate =>{
+            mapContentModel
+            .findById(debate.referenceMapContent._id)
+            .then(mapContent =>{                    
+                referenceMapConcepts = mapToArray(mapContent);
+                allConcepts = concatDiffer(allConcepts, referenceMapConcepts);
+
                 debateUnityModel
                 .find({'debate._id' : req.params.debateId})
                 .then(debateUnities => {
@@ -418,102 +430,56 @@ module.exports = app => {
                             });
                         }).then(function(){
                             if(i === array.length - 1){
-                                weightedReference = conceptArrayToBoolean(allConcepts, referenceMapConcepts);                                    
+                                weightedReference = conceptArrayToBoolean(allConcepts, referenceMapConcepts);
 
-                                initialMapConcepts.forEach(element => {                               
-                                    element.booleanArray = conceptArrayToBoolean(allConcepts, element.mapConcepts);
+                                initialMapConcepts.forEach(element => {
+                                    element.booleanArray = conceptArrayToBoolean(allConcepts, element.mapConcepts);                               
+                                    booleanArrays.push(element.booleanArray);                               
                                     element.debateUnity.initialDistance = computeEuclideanDistance(weightedReference, element.booleanArray);
                                 });
 
-                                initialMapConcepts.sort(comparaDistancias);                                    
+                                initialMapConcepts.forEach((element, i, arr) => {
+                                    var distances = [];
+                                    arr.filter(value => {value.debateUnity._id != element.debateUnity._id})
+                                    .forEach(elem => {
+                                        distances.push([elem.debateUnity._id, computeEuclideanDistance(element.booleanArray, elem.booleanArray)])
+                                    });
 
-                                initialMapConcepts.forEach((element, idx, array) => {
-                                    if(idx === array.length - 1){
-                                        element.debateUnity.questioner1 = array[idx - 1].debateUnity.mapsAuthor;
-                                        element.debateUnity.questioner2 = array[idx - 2].debateUnity.mapsAuthor;
-                                    }else if(idx === array.length - 2){
-                                        element.debateUnity.questioner1 = array[idx + 1].debateUnity.mapsAuthor;
-                                        element.debateUnity.questioner2 = array[idx - 2].debateUnity.mapsAuthor;
-                                    }else if(idx === 0){
-                                        element.debateUnity.questioner1 = array[1].debateUnity.mapsAuthor;
-                                        element.debateUnity.questioner2 = array[2].debateUnity.mapsAuthor;
-                                    }else if(idx === 1){
-                                        element.debateUnity.questioner1 = array[0].debateUnity.mapsAuthor;
-                                        element.debateUnity.questioner2 = array[3].debateUnity.mapsAuthor;
-                                    }else{
-                                        element.debateUnity.questioner1 = array[idx + 2].debateUnity.mapsAuthor;
-                                        element.debateUnity.questioner2 = array[idx - 2].debateUnity.mapsAuthor;
-                                    }
+                                    distances.sort(comparaDistancias2);
                                 });
 
-                                console.log(initialMapConcepts);
+                                // console.log(initialMapConcepts);
 
-                                var p2 = Promise.resolve();
+                                // var p2 = Promise.resolve();
 
-                                var updatedDebateUnities = [];
+                                // var updatedDebateUnities = [];
 
-                                initialMapConcepts.forEach((element, ind, arrayInitial) => {
-                                    p2.then(new Promise(function(resolve2){
-                                        debateUnityModel
-                                        .findByIdAndUpdate(element.debateUnity._id, element.debateUnity, { new: true })
-                                        .then(updatedDebateUnity => {
-                                            updatedDebateUnities.push(updatedDebateUnity);
+                                // initialMapConcepts.forEach((element, ind, arrayInitial) => {
+                                //     p2.then(new Promise(function(resolve2){
+                                //         debateUnityModel
+                                //         .findByIdAndUpdate(element.debateUnity._id, element.debateUnity, { new: true })
+                                //         .then(updatedDebateUnity => {
+                                //             updatedDebateUnities.push(updatedDebateUnity);
 
-                                            resolve2();
-                                        });
-                                    }).then(function(){
-                                        if(ind === arrayInitial.length - 1){
-                                            console.log('resposta');
+                                //             resolve2();
+                                //         });
+                                //     }).then(function(){
+                                //         if(ind === arrayInitial.length - 1){
+                                //             console.log('resposta');
 
-                                            res.json({
-                                                userMessage: 'Debate processed successfully. ',
-                                                updatedDebateUnities 
-                                            });
-                                        }
-                                    }));
-                                });                                    
-                                
-                                // var p3 = Promise.resolve();
-                                // for (let index = 2; index < distances.length; index++) {
-                                // var index = 4; // setando 4 clusters, mas teria que escolher pela qualidade da clusterização
-                                // p3.then(new Promise(function(resolve){
-                                //     kmeans.clusterize(distances, {k: index}, (err,resp) => {
-                                //         if (err) console.error(err);
-                                //         else {
-                                //             console.log(resp);
-
-                                //             resp.sort(comparaClusters);
-
-                                //             resp.forEach(el,ind => {
-                                //                 if(ind === 0){
-                                //                     var clusterMapConcepts = [];
-                                //                     el.clusterInd.forEach(element => {
-                                //                         clusterMapConcepts.push(weightedInitial[ind].mapConcepts);
-                                //                     });
-
-                                //                     // setando 2 clusters, mas teria que escolher pela qualidade da clusterização
-                                //                     kmeans.clusterize(clusterMapConcepts, {k: 2}, (err,resp) => {
-                                //                         if (err) console.error(err);
-                                //                         else {
-                                                            
-                                //                         }
-                                //                     });
-                                //                 }
+                                //             res.json({
+                                //                 userMessage: 'Debate processed successfully. ',
+                                //                 updatedDebateUnities 
                                 //             });
-
-                                //             console.log(resp);
-                                //             resolve();                                                                                          
                                 //         }
-                                //     }); 
-                                // }).then(function(){                                        
-                                // }));                                   
-                                // }                          
-
+                                //     }));
+                                // });
                             }
                         }));
                     });                       
                 });
-            },error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
+            });
+        },error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
     };
 
     api.findByIdAndProcessClustersFinal = (req, res) => {
