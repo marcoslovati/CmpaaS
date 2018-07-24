@@ -25,8 +25,8 @@ module.exports = app => {
         return a.debateUnity.initialDistance < b.debateUnity.initialDistance;
     }
 
-    var comparaDistancias2 = function (a, b){
-        return a[1] < b[1];
+    var comparaDistanciasReverso = function (a, b){
+        return a.distance > b.distance;
     }
 
     function mapToArray(map){
@@ -253,7 +253,7 @@ module.exports = app => {
             },error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
     };
 
-    api.findByIdAndProcessLevelsFinal = (req, res) => {
+    api.findByIdAndProcessFinal = (req, res) => {
         var allConcepts = [];
         var referenceMapConcepts = [];
         var finalMapConcepts = [];
@@ -438,175 +438,69 @@ module.exports = app => {
                                     element.debateUnity.initialDistance = computeEuclideanDistance(weightedReference, element.booleanArray);
                                 });
 
+                                initialMapConcepts.sort(comparaDistancias);
+                                initialMapConcepts.reverse();
+
                                 initialMapConcepts.forEach((element, i, arr) => {
-                                    var distances = [];
-                                    arr.filter(value => {value.debateUnity._id != element.debateUnity._id})
-                                    .forEach(elem => {
-                                        distances.push([elem.debateUnity._id, computeEuclideanDistance(element.booleanArray, elem.booleanArray)])
+                                    element.distances = [];                               
+                                    var filtArray = arr.filter(value => {value.debateUnity._id != element.debateUnity._id});
+                                    filtArray.forEach(elem => {                                        
+                                        element.distances.push({debateUnity:elem.debateUnity, distance:computeEuclideanDistance(element.booleanArray, elem.booleanArray)});
                                     });
 
-                                    distances.sort(comparaDistancias2);
+                                    element.distances.sort(comparaDistanciasReverso);
+                                });
+
+                                initialMapConcepts.forEach((element, i, arr) => {                                    
+                                    element.distances.every(elem => {
+                                        var contQ1 = arr.filter(value => { value.debateUnity.questioner1 == elem.debateUnity.mapsAuthor }).length;
+                                        var contQ2 = arr.filter(value => { value.debateUnity.questioner2 == elem.debateUnity.mapsAuthor }).length;
+
+                                        if(contQ1 + contQ2 < 2){
+                                            if(element.debateUnity.questioner1 == undefined)
+                                                element.debateUnity.questioner1 = elem.debateUnity.mapsAuthor;
+                                            else if(element.debateUnity.questioner2 == undefined){
+                                                element.debateUnity.questioner2 = elem.debateUnity.mapsAuthor;
+                                                return false;
+                                            }
+                                        }
+                                        return false;
+                                    });
                                 });
 
                                 // console.log(initialMapConcepts);
 
-                                // var p2 = Promise.resolve();
+                                var p2 = Promise.resolve();
 
-                                // var updatedDebateUnities = [];
+                                var updatedDebateUnities = [];
 
-                                // initialMapConcepts.forEach((element, ind, arrayInitial) => {
-                                //     p2.then(new Promise(function(resolve2){
-                                //         debateUnityModel
-                                //         .findByIdAndUpdate(element.debateUnity._id, element.debateUnity, { new: true })
-                                //         .then(updatedDebateUnity => {
-                                //             updatedDebateUnities.push(updatedDebateUnity);
+                                initialMapConcepts.forEach((element, ind, arrayInitial) => {
+                                    p2.then(new Promise(function(resolve2){
+                                        debateUnityModel
+                                        .findByIdAndUpdate(element.debateUnity._id, element.debateUnity, { new: true })
+                                        .then(updatedDebateUnity => {
+                                            updatedDebateUnities.push(updatedDebateUnity);
 
-                                //             resolve2();
-                                //         });
-                                //     }).then(function(){
-                                //         if(ind === arrayInitial.length - 1){
-                                //             console.log('resposta');
+                                            resolve2();
+                                        });
+                                    }).then(function(){
+                                        if(ind === arrayInitial.length - 1){
+                                            console.log('resposta');
+                                            console.log(updatedDebateUnities);
 
-                                //             res.json({
-                                //                 userMessage: 'Debate processed successfully. ',
-                                //                 updatedDebateUnities 
-                                //             });
-                                //         }
-                                //     }));
-                                // });
+                                            res.json({
+                                                userMessage: 'Debate processed successfully. ',
+                                                updatedDebateUnities 
+                                            });
+                                        }
+                                    }));
+                                });
                             }
                         }));
                     });                       
                 });
             });
         },error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
-    };
-
-    api.findByIdAndProcessClustersFinal = (req, res) => {
-        var allConcepts = [];
-        var referenceMapConcepts = [];
-        var finalMapConcepts = [];
-
-        var weightedReference = [];
-
-        console.log("findByIdAndProcess");
-
-        debateModel
-            .findById(req.params.debateId)
-            .then(debate =>{
-                mapContentModel
-                .findById(debate.referenceMapContent._id)
-                .then(mapContent =>{                    
-                    referenceMapConcepts = mapToArray(mapContent);
-                    allConcepts = concatDiffer(allConcepts, referenceMapConcepts);
-
-                    debateUnityModel
-                    .find({'debate._id' : req.params.debateId})
-                    .then(debateUnities => {
-                        var p = Promise.resolve();
-
-                        debateUnities.forEach((element, i, array) => {
-                            p.then(new Promise(function(resolve){
-                                mapContentModel
-                                .findById(element.finalMapContent._id)
-                                .then(mapContent =>{
-
-                                    mapModel
-                                    .findById(mapContent.map._id)
-                                    .then(map =>{
-                                        var mapConcepts = mapToArray(mapContent);
-                                        
-                                        element.mapsAuthor = map.author;
-
-                                        finalMapConcepts.push({
-                                            "debateUnity":element,
-                                            "mapConcepts": mapConcepts
-                                        });
-        
-                                        allConcepts = concatDiffer(allConcepts, mapConcepts);
-                                        
-                                        resolve();
-                                    });                                    
-                                });
-                            }).then(function(){
-                                if(i === array.length - 1){
-                                    console.log("agora sim");
-                                    weightedReference = conceptArrayToBoolean(allConcepts, referenceMapConcepts);                                    
-
-                                    finalMapConcepts.forEach(element => {                               
-                                        element.booleanArray = conceptArrayToBoolean(allConcepts, element.mapConcepts);
-                                        element.debateUnity.finalDistance = computeEuclideanDistance(weightedReference, element.booleanArray);
-                                    });
-
-                                    console.log(finalMapConcepts);
-
-                                    var p2 = Promise.resolve();
-
-                                    var updatedDebateUnities = [];
-
-                                    finalMapConcepts.forEach((element, ind, arrayFinal) => {
-                                        p2.then(new Promise(function(resolve2){
-                                            debateUnityModel
-                                            .findByIdAndUpdate(element.debateUnity._id, element.debateUnity, { new: true })
-                                            .then(updatedDebateUnity => {
-                                                updatedDebateUnities.push(updatedDebateUnity);
-
-                                                resolve2();
-                                            });
-                                        }).then(function(){
-                                            if(ind === arrayFinal.length - 1){
-                                                console.log('resposta');
-
-                                                res.json({
-                                                    userMessage: 'Debate processed successfully. ',
-                                                    updatedDebateUnities 
-                                                });
-                                            }
-                                        }));
-                                    });                                    
-                                    
-                                    // var p3 = Promise.resolve();
-                                    // for (let index = 2; index < distances.length; index++) {
-                                    // var index = 4; // setando 4 clusters, mas teria que escolher pela qualidade da clusterização
-                                    // p3.then(new Promise(function(resolve){
-                                    //     kmeans.clusterize(distances, {k: index}, (err,resp) => {
-                                    //         if (err) console.error(err);
-                                    //         else {
-                                    //             console.log(resp);
-
-                                    //             resp.sort(comparaClusters);
-
-                                    //             resp.forEach(el,ind => {
-                                    //                 if(ind === 0){
-                                    //                     var clusterMapConcepts = [];
-                                    //                     el.clusterInd.forEach(element => {
-                                    //                         clusterMapConcepts.push(weightedInitial[ind].mapConcepts);
-                                    //                     });
-
-                                    //                     // setando 2 clusters, mas teria que escolher pela qualidade da clusterização
-                                    //                     kmeans.clusterize(clusterMapConcepts, {k: 2}, (err,resp) => {
-                                    //                         if (err) console.error(err);
-                                    //                         else {
-                                                                
-                                    //                         }
-                                    //                     });
-                                    //                 }
-                                    //             });
-
-                                    //             console.log(resp);
-                                    //             resolve();                                                                                          
-                                    //         }
-                                    //     }); 
-                                    // }).then(function(){                                        
-                                    // }));                                   
-                                    // }                          
-
-                                }
-                            }));
-                        });                       
-                    });
-                });
-            },error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
     };
 
     return api;

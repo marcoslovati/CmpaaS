@@ -19,14 +19,10 @@ module.exports = app => {
         .post(authApi.authenticationRequired, api.findByIdAndProcessLevelsInitial);
 
     app
-        .route('/v1/debates/processLevelsFinal/debate/:debateId')
-        .post(authApi.authenticationRequired, api.findByIdAndProcessLevelsFinal);
+        .route('/v1/debates/processFinal/debate/:debateId')
+        .post(authApi.authenticationRequired, api.findByIdAndProcessFinal);
 
     app
         .route('/v1/debates/processClustersInitial/debate/:debateId')
         .post(authApi.authenticationRequired, api.findByIdAndProcessClustersInitial);
-
-    app
-        .route('/v1/debates/processClustersFinal/debate/:debateId')
-        .post(authApi.authenticationRequired, api.findByIdAndProcessClustersFinal);
 }
