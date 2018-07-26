@@ -26,7 +26,7 @@ module.exports = app => {
     }
 
     var comparaDistanciasReverso = function (a, b){
-        return a.distance > b.distance;
+        return a.distance < b.distance;
     }
 
     function mapToArray(map){
@@ -436,6 +436,8 @@ module.exports = app => {
                                     element.booleanArray = conceptArrayToBoolean(allConcepts, element.mapConcepts);                               
                                     booleanArrays.push(element.booleanArray);                               
                                     element.debateUnity.initialDistance = computeEuclideanDistance(weightedReference, element.booleanArray);
+                                    element.debateUnity.questioner1 = {};
+                                    element.debateUnity.questioner2 = {};
                                 });
 
                                 initialMapConcepts.sort(comparaDistancias);
@@ -443,7 +445,7 @@ module.exports = app => {
 
                                 initialMapConcepts.forEach((element, i, arr) => {
                                     element.distances = [];                               
-                                    var filtArray = arr.filter(value => {value.debateUnity._id != element.debateUnity._id});
+                                    let filtArray = arr.filter(value => { return value.debateUnity._id != element.debateUnity._id});
                                     filtArray.forEach(elem => {                                        
                                         element.distances.push({debateUnity:elem.debateUnity, distance:computeEuclideanDistance(element.booleanArray, elem.booleanArray)});
                                     });
@@ -451,22 +453,46 @@ module.exports = app => {
                                     element.distances.sort(comparaDistanciasReverso);
                                 });
 
-                                initialMapConcepts.forEach((element, i, arr) => {                                    
-                                    element.distances.every(elem => {
-                                        var contQ1 = arr.filter(value => { value.debateUnity.questioner1 == elem.debateUnity.mapsAuthor }).length;
-                                        var contQ2 = arr.filter(value => { value.debateUnity.questioner2 == elem.debateUnity.mapsAuthor }).length;
+                                let arrCont = [];
 
-                                        if(contQ1 + contQ2 < 2){
-                                            if(element.debateUnity.questioner1 == undefined)
-                                                element.debateUnity.questioner1 = elem.debateUnity.mapsAuthor;
-                                            else if(element.debateUnity.questioner2 == undefined){
-                                                element.debateUnity.questioner2 = elem.debateUnity.mapsAuthor;
-                                                return false;
-                                            }
+                                initialMapConcepts.forEach((element) => {
+                                    console.log('debateUnity.mapsAuthor: ' + element.debateUnity.mapsAuthor.username);
+
+                                    let distances = element.distances; 
+                                    let i = 0;
+
+                                    while((element.debateUnity.questioner1._id == undefined || element.debateUnity.questioner2._id == undefined) && i < distances.length){
+                                        console.log('entrou while');
+                                        
+                                        let author = distances[i].debateUnity.mapsAuthor;
+                                        console.log(author.username);
+                                        let count = arrCont.find(el => { return author._id == el.id });
+                                        console.log(count);
+
+                                        if(count == undefined){
+                                            count = {id: author._id, count: 0}
+                                            arrCont.push(count);
                                         }
-                                        return false;
-                                    });
+
+                                        if(count.count < 2){
+                                            console.log('entrou if');
+                                            console.log('questioner1:' + element.debateUnity.questioner1._id );
+                                            console.log('questioner2:' + element.debateUnity.questioner2._id );
+                                            if(element.debateUnity.questioner1._id == undefined)
+                                                element.debateUnity.questioner1 = author;
+                                            else if(element.debateUnity.questioner2._id == undefined)
+                                                element.debateUnity.questioner2 = author;
+
+                                            count.count = count.count + 1;
+                                        }
+                                        
+                                        i++;
+                                        console.log(arrCont);
+                                        console.log('-------------');
+                                    }                                    
                                 });
+
+                                console.log(arrCont)
 
                                 // console.log(initialMapConcepts);
 
@@ -486,7 +512,7 @@ module.exports = app => {
                                     }).then(function(){
                                         if(ind === arrayInitial.length - 1){
                                             console.log('resposta');
-                                            console.log(updatedDebateUnities);
+                                            // console.log(updatedDebateUnities);
 
                                             res.json({
                                                 userMessage: 'Debate processed successfully. ',

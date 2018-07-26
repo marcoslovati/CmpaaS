@@ -133,7 +133,7 @@ module.exports = app => {
                     if(!group.users) res.json(false);
                     else {
                         let user = group.users.filter(user => (user.id === req.params.id));
-                        console.log(user);                       
+                        // console.log(user);                       
                         res.json(user.length > 0);
                     }
                 }
