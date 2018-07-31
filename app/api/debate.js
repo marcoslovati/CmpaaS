@@ -148,6 +148,8 @@ module.exports = app => {
                                     initialMapConcepts.forEach(element => {                               
                                         element.booleanArray = conceptArrayToBoolean(allConcepts, element.mapConcepts);
                                         element.debateUnity.initialDistance = computeEuclideanDistance(weightedReference, element.booleanArray);
+                                        element.debateUnity.questioner1 = undefined;
+                                        element.debateUnity.questioner2 = undefined;
                                     });
 
                                     initialMapConcepts.sort(comparaDistancias);                                    
@@ -350,11 +352,11 @@ module.exports = app => {
                                 initialMapConcepts.sort(comparaDistancias);
                                 initialMapConcepts.reverse();
 
-                                initialMapConcepts.forEach((element, i, arr) => {
+                                initialMapConcepts.forEach((element, i, arr) => {                                    
                                     element.distances = [];                               
                                     let filtArray = arr.filter(value => { return value.debateUnity._id != element.debateUnity._id});
                                     filtArray.forEach(elem => {                                        
-                                        element.distances.push({debateUnity:elem.debateUnity, distance:computeEuclideanDistance(element.booleanArray, elem.booleanArray)});
+                                        element.distances.push({debateUnity:elem.debateUnity, distance:computeEuclideanDistance(element.booleanArray, elem.booleanArray)});                                        
                                     });
 
                                     element.distances.sort(comparaDistanciasReverso);
@@ -380,7 +382,7 @@ module.exports = app => {
                                                 arrCont.push(count);
                                             }
 
-                                            if(count.count < 2){
+                                            if(count.count < 2){                                                
                                                 if(element.debateUnity.questioner1._id == undefined)
                                                     element.debateUnity.questioner1 = author;
                                                 else if(element.debateUnity.questioner2._id == undefined)
