@@ -4,6 +4,7 @@ module.exports = app => {
     const computeEuclideanDistance = require('compute-euclidean-distance');
     const kmeans = require('node-kmeans');
     const promise = require("bluebird");
+    const pythonShell = require("python-shell");
     const userModel = mongoose.model('User');
     const debateModel = mongoose.model('Debate');
     const debateUnityModel = mongoose.model('DebateUnity');
@@ -19,15 +20,35 @@ module.exports = app => {
         return a.distance < b.distance;
     }
 
-    function mapToArray(map){
-        var concepts = [];
-        var content = JSON.parse(map.content);
-        content.nodeDataArray.forEach(nodeData => {
-            if(!concepts.includes(nodeData.text))
-                concepts.push(nodeData.text);
-        });
-        return concepts;
-    }
+    let mapToArray = function (map){
+        return new Promise(function(success, nosuccess) {
+            let content = JSON.parse(map.content);
+            let concepts = [];
+
+            content.nodeDataArray.forEach(elem =>
+                concepts.push(elem.text)
+            );
+
+            // console.log(concepts);
+
+            let options = {
+                pythonPath:'/home/marcos/Documentos/CMPaaS/app/plnpython/env/bin/python3',
+                mode: 'text',
+                pythonOptions: ['-u'],
+                scriptPath: '/home/marcos/Documentos/CMPaaS/app/plnpython',
+                args: [concepts]
+            };        
+        
+            pythonShell.run('lemmasfromconcept.py', options, function (err, data) {
+                if (err) console.log(err);
+                else{  
+                    // console.log('sucesssoooo');
+                    // console.log(data);
+                    success(data[0].split(','));
+                }             
+            }); 
+        });               
+    }       
 
     function concatDiffer(allItems, newItems){
         newItems.forEach(element =>{
@@ -108,103 +129,132 @@ module.exports = app => {
             .then(debate =>{
                 mapContentModel
                 .findById(debate.referenceMapContent._id)
-                .then(mapContent =>{                    
-                    referenceMapConcepts = mapToArray(mapContent);
-                    allConcepts = concatDiffer(allConcepts, referenceMapConcepts);
+                .then(mapContent =>{    
+                    
+                    mapToArray(mapContent)
+                    .then(function(fromRunpy) {
+                        console.log(fromRunpy.toString());
+                        referenceMapConcepts = fromRunpy;
+                        console.log('referenceMapConcepts'); 
+                        console.log(referenceMapConcepts);                    
 
-                    debateUnityModel
-                    .find({'debate._id' : req.params.debateId})
-                    .then(debateUnities => {
-                        var p = Promise.resolve();
+                        allConcepts = concatDiffer(allConcepts, referenceMapConcepts);
 
-                        debateUnities.forEach((element, i, array) => {
-                            p.then(new Promise(function(resolve){
-                                mapContentModel
-                                .findById(element.initialMapContent._id)
-                                .then(mapContent =>{
-                                    console.log("passo " + mapContent._id);
+                        debateUnityModel
+                        .find({'debate._id' : req.params.debateId})
+                        .then(debateUnities => {
+                            // var p = Promise.resolve();
+                            let promises = [];
 
-                                    mapModel
-                                    .findById(mapContent.map._id)
-                                    .then(map =>{
-                                        var mapConcepts = mapToArray(mapContent);
-                                        
-                                        element.mapsAuthor = map.author;
+                            debateUnities.forEach((element, i, array) => {
+                                // p.then(new Promise(function(resolve){
+                                promises.push(
+                                    mapContentModel
+                                    .findById(element.initialMapContent._id)
+                                    .then(mapContent =>{
+                                        // console.log("passo " + mapContent._id);
 
-                                        initialMapConcepts.push({
-                                            "debateUnity":element,
-                                            "mapConcepts": mapConcepts
+                                        mapModel
+                                        .findById(mapContent.map._id)
+                                        .then(map =>{
+                                            // var mapConcepts = mapToArray(mapContent);
+
+                                            mapToArray(mapContent)
+                                            .then(function(fromRunpy2) {
+                                                // console.log(fromRunpy2);
+                                                mapConcepts = fromRunpy2;
+                                                console.log('mapConcepts');
+                                                console.log(mapConcepts);
+                                            
+                                                element.mapsAuthor = map.author;
+
+                                                initialMapConcepts.push({
+                                                    "debateUnity":element,
+                                                    "mapConcepts": mapConcepts
+                                                });
+                
+                                                allConcepts = concatDiffer(allConcepts, mapConcepts);
+                                            });
+                                            
+                                            // resolve();
                                         });
-        
-                                        allConcepts = concatDiffer(allConcepts, mapConcepts);
-                                        
-                                        resolve();
-                                    });                                    
+                                                                        
+                                    // });
+                                    })
+                                );
+                            });
+                                // .then(function(){  
+                            Promise.all(promises).then(() => {                                
+                                console.log('chegou no then');
+                                weightedReference = conceptArrayToBoolean(allConcepts, referenceMapConcepts);                                    
+                                
+                                initialMapConcepts.forEach(element => {                               
+                                    element.booleanArray = conceptArrayToBoolean(allConcepts, element.mapConcepts);
+                                    element.debateUnity.initialDistance = computeEuclideanDistance(weightedReference, element.booleanArray);
+                                    element.debateUnity.questioner1 = undefined;
+                                    element.debateUnity.questioner2 = undefined;
                                 });
-                            }).then(function(){
-                                if(i === array.length - 1){
-                                    weightedReference = conceptArrayToBoolean(allConcepts, referenceMapConcepts);                                    
 
-                                    initialMapConcepts.forEach(element => {                               
-                                        element.booleanArray = conceptArrayToBoolean(allConcepts, element.mapConcepts);
-                                        element.debateUnity.initialDistance = computeEuclideanDistance(weightedReference, element.booleanArray);
-                                        element.debateUnity.questioner1 = undefined;
-                                        element.debateUnity.questioner2 = undefined;
-                                    });
+                                initialMapConcepts.sort(comparaDistancias);                                    
 
-                                    initialMapConcepts.sort(comparaDistancias);                                    
+                                initialMapConcepts.forEach((element, idx, array) => {
+                                    if(idx === array.length - 1){
+                                        element.debateUnity.questioner1 = array[idx - 1].debateUnity.mapsAuthor;
+                                        element.debateUnity.questioner2 = array[idx - 2].debateUnity.mapsAuthor;
+                                    }else if(idx === array.length - 2){
+                                        element.debateUnity.questioner1 = array[idx + 1].debateUnity.mapsAuthor;
+                                        element.debateUnity.questioner2 = array[idx - 2].debateUnity.mapsAuthor;
+                                    }else if(idx === 0){
+                                        element.debateUnity.questioner1 = array[1].debateUnity.mapsAuthor;
+                                        element.debateUnity.questioner2 = array[2].debateUnity.mapsAuthor;
+                                    }else if(idx === 1){
+                                        element.debateUnity.questioner1 = array[0].debateUnity.mapsAuthor;
+                                        element.debateUnity.questioner2 = array[3].debateUnity.mapsAuthor;
+                                    }else{
+                                        element.debateUnity.questioner1 = array[idx + 2].debateUnity.mapsAuthor;
+                                        element.debateUnity.questioner2 = array[idx - 2].debateUnity.mapsAuthor;
+                                    }
+                                });
 
-                                    initialMapConcepts.forEach((element, idx, array) => {
-                                        if(idx === array.length - 1){
-                                            element.debateUnity.questioner1 = array[idx - 1].debateUnity.mapsAuthor;
-                                            element.debateUnity.questioner2 = array[idx - 2].debateUnity.mapsAuthor;
-                                        }else if(idx === array.length - 2){
-                                            element.debateUnity.questioner1 = array[idx + 1].debateUnity.mapsAuthor;
-                                            element.debateUnity.questioner2 = array[idx - 2].debateUnity.mapsAuthor;
-                                        }else if(idx === 0){
-                                            element.debateUnity.questioner1 = array[1].debateUnity.mapsAuthor;
-                                            element.debateUnity.questioner2 = array[2].debateUnity.mapsAuthor;
-                                        }else if(idx === 1){
-                                            element.debateUnity.questioner1 = array[0].debateUnity.mapsAuthor;
-                                            element.debateUnity.questioner2 = array[3].debateUnity.mapsAuthor;
-                                        }else{
-                                            element.debateUnity.questioner1 = array[idx + 2].debateUnity.mapsAuthor;
-                                            element.debateUnity.questioner2 = array[idx - 2].debateUnity.mapsAuthor;
+                                console.log(initialMapConcepts);
+
+                                // var p2 = Promise.resolve();
+                                let promises2 = [];
+
+                                var updatedDebateUnities = [];
+
+                                initialMapConcepts.forEach((element, ind, arrayInitial) => {
+                                    // p2.then(new Promise(function(resolve2){
+                                    promises2.push(
+                                        debateUnityModel
+                                        .findByIdAndUpdate(element.debateUnity._id, element.debateUnity, { new: true })
+                                        .then(updatedDebateUnity => {
+                                            updatedDebateUnities.push(updatedDebateUnity);
+
+                                            resolve2();
+                                        })
+                                    );
+
+                                    // }).then(function(){
+                                    Promise.all(promises2).then(() => {
+                                        console.log('chegou no then 2');
+                                        if(ind === arrayInitial.length - 1){
+                                            console.log('resposta');
+
+                                            res.json({
+                                                userMessage: 'Debate processed successfully. ',
+                                                updatedDebateUnities 
+                                            });
                                         }
                                     });
-
-                                    console.log(initialMapConcepts);
-
-                                    var p2 = Promise.resolve();
-
-                                    var updatedDebateUnities = [];
-
-                                    initialMapConcepts.forEach((element, ind, arrayInitial) => {
-                                        p2.then(new Promise(function(resolve2){
-                                            debateUnityModel
-                                            .findByIdAndUpdate(element.debateUnity._id, element.debateUnity, { new: true })
-                                            .then(updatedDebateUnity => {
-                                                updatedDebateUnities.push(updatedDebateUnity);
-
-                                                resolve2();
-                                            });
-                                        }).then(function(){
-                                            if(ind === arrayInitial.length - 1){
-                                                console.log('resposta');
-
-                                                res.json({
-                                                    userMessage: 'Debate processed successfully. ',
-                                                    updatedDebateUnities 
-                                                });
-                                            }
-                                        }));
-                                    });
-                                }
-                            }));
-                        });                       
-                    });
+                                });
+                            });
+                                // }));
+                        });
+                    });                       
                 });
-            },error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
+            // });
+        },error => error => res.status(500).json(errorParser.parse('debateUnities-2', error)));
     };
 
     api.findByIdAndProcessFinal = (req, res) => {
