@@ -22,6 +22,7 @@ module.exports = app => {
 
     let mapToArray = function (map){
         return new Promise(function(success, nosuccess) {
+            console.log(map.content);
             let content = JSON.parse(map.content);
             let concepts = [];
 
@@ -372,15 +373,15 @@ module.exports = app => {
                                 new Promise(function(resolve, reject){
                                     mapContentModel
                                     .findById(element.initialMapContent._id)
-                                    .then(mapContent =>{
-
+                                    .then(mapContent =>{                                        
                                         mapModel
                                         .findById(mapContent.map._id)
                                         .then(map =>{
+                                            console.log(map.author.username);
                                             mapToArray(mapContent)
                                             .then(function(fromRunpy2) {
                                                 mapConcepts = fromRunpy2;  
-                                                console.log(fromRunpy2);
+                                                // console.log(fromRunpy2);
                                                 element.mapsAuthor = map.author;
 
                                                 initialMapConcepts.push({
@@ -488,9 +489,15 @@ module.exports = app => {
                                         arrCont.push(count);
                                     }
 
-                                    if(count.count == 0 && (quest.debateUnity.questioner1._id == undefined || !quest.debateUnity.questioner1._id.equals(element.debateUnity.mapsAuthor._id))){
+                                    console.log('count');
+                                    console.log(count);
+
+                                    if(count.count == 0 && (quest.debateUnity.questioner1._id == undefined || 
+                                                            ((!quest.debateUnity.questioner1._id.equals(element.debateUnity.mapsAuthor._id) || index == initialMapConcepts.length - 1) && index != initialMapConcepts.length - 2))){
                                         element.debateUnity.questioner1 = author;
                                         count.count = count.count + 1;
+                                        console.log('questioner1: ' + element.debateUnity.questioner1.username);
+                                        console.log('questioner2: ' + element.debateUnity.questioner2.username);
                                     }
                                         
                                     i++;
@@ -512,13 +519,9 @@ module.exports = app => {
 
                                     let count = arrCont.find(el => { return author._id == el.id });
 
-                                    if(count == undefined){
-                                        count = {id: author._id, count: 0}
-                                        arrCont.push(count);
-                                    }
-
-                                    if(count.count == 1 && element.debateUnity.questioner1._id != author._id
-                                        && (quest.debateUnity.questioner2._id == undefined || !quest.debateUnity.questioner2._id.equals(element.debateUnity.mapsAuthor._id))){
+                                    if(count.count == 1 && !element.debateUnity.questioner1._id.equals(author._id)){
+                                                        // && (quest.debateUnity.questioner2._id == undefined || 
+                                                        //     ((!quest.debateUnity.questioner2._id.equals(element.debateUnity.mapsAuthor._id) || index == initialMapConcepts.length - 1) && index != initialMapConcepts.length - 2))){
                                         element.debateUnity.questioner2 = author;
                                         count.count = count.count + 1;
                                     }

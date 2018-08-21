@@ -129,11 +129,9 @@ module.exports = app => {
             .then(group => {
                 if(!group) res.status(404).json(errorParser.parse('groups-1', {}))
                 else {
-                    console.log(group.users);
                     if(!group.users) res.json(false);
                     else {
-                        let user = group.users.filter(user => (user.id === req.params.id));
-                        // console.log(user);                       
+                        let user = group.users.filter(user => (user.id === req.params.id));                     
                         res.json(user.length > 0);
                     }
                 }
@@ -290,7 +288,6 @@ module.exports = app => {
                     .findById(req.auth.user._id)
                     .then(user => {
                         user.profilePicture = req.file.path.replace("public", "");
-                        console.log(user);
                         user.save();
                         res.sendStatus(200);
                     });

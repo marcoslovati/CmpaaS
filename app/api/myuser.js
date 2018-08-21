@@ -40,7 +40,6 @@ module.exports = app => {
                     .findById(req.auth.user._id)
                     .then(user => {
                         user.profilePicture = req.file.path.replace("public", "");
-                        console.log(user);
                         user.save();
                         res.sendStatus(200);
                     });
