@@ -22,7 +22,6 @@ module.exports = app => {
 
     let mapToArray = function (map){
         return new Promise(function(success, nosuccess) {
-            // console.log(map.content);
             let content = JSON.parse(map.content);
             let concepts = [];
 
@@ -30,21 +29,26 @@ module.exports = app => {
                 concepts.push(elem.text)
             );
 
-            // console.log(concepts);
+            let pathFolders = __dirname.split('/');
+            let path = "";
+
+            pathFolders.forEach((dir, i) => {
+                if(i < pathFolders.length - 1){
+                    path += dir + '/';
+                }
+            });
 
             let options = {
-                pythonPath:'/home/marcos/Documentos/CMPaaS/app/plnpython/env/bin/python3',
+                pythonPath: path + 'plnpython/env/bin/python3',
                 mode: 'text',
                 pythonOptions: ['-u'],
-                scriptPath: '/home/marcos/Documentos/CMPaaS/app/plnpython',
+                scriptPath: path + 'plnpython',
                 args: [concepts]
             };        
         
             pythonShell.run('lemmasfromconcept.py', options, function (err, data) {
                 if (err) console.log(err);
-                else{  
-                    // console.log('sucesssoooo');
-                    // console.log(data);
+                else{
                     success(data[0].split(','));
                 }             
             }); 
@@ -134,7 +138,7 @@ module.exports = app => {
                         debateUnityModel
                         .findByIdAndUpdate(element._id, element, { new: true })
                         .then(updatedDebateUnity => {
-                            console.log("alterado");                            
+                            // console.log("alterado");                            
                         });
                     });
                 });
@@ -154,7 +158,7 @@ module.exports = app => {
 
         var weightedReference = [];
 
-        console.log("findByIdAndProcess");
+        console.log("findByIdAndProcessLevelsInitial");
 
         debateModel
         .findById(req.params.debateId)
@@ -165,7 +169,7 @@ module.exports = app => {
                 
                 mapToArray(mapContent)
                 .then(function(fromRunpy) {
-                    console.log(fromRunpy);
+                    // console.log(fromRunpy);
                     referenceMapConcepts = fromRunpy;
                     allConcepts = concatDiffer(allConcepts, referenceMapConcepts);
 
@@ -193,8 +197,6 @@ module.exports = app => {
                                                     "debateUnity": element,
                                                     "mapConcepts": mapConcepts
                                                 });
-
-                                                console.log('initialMapConcepts.push');
                 
                                                 allConcepts = concatDiffer(allConcepts, mapConcepts);
                                                 resolve();
@@ -212,8 +214,10 @@ module.exports = app => {
                             initialMapConcepts.forEach(element => {                               
                                 element.booleanArray = conceptArrayToBoolean(allConcepts, element.mapConcepts);
                                 element.debateUnity.initialDistance = computeEuclideanDistance(weightedReference, element.booleanArray);
-                                element.debateUnity.questioner1 = null;
-                                element.debateUnity.questioner2 = null;
+                                element.debateUnity.question1 = null;
+                                element.debateUnity.question2 = null;
+                                element.debateUnity.question3 = null;
+                                element.debateUnity.question4 = null;
                             });
 
                             initialMapConcepts.sort(comparaDistancias);                                    
@@ -237,8 +241,6 @@ module.exports = app => {
                                     element.debateUnity.questioner2 = array[idx - 2].debateUnity.mapsAuthor;
                                 }
                             });
-
-                            console.log(initialMapConcepts);
 
                             let promises2 = [];
 
@@ -288,7 +290,7 @@ module.exports = app => {
 
         var weightedReference = [];
 
-        console.log("findByIdAndProcess");
+        console.log("findByIdAndProcessFinal");
 
         debateModel
         .findById(req.params.debateId)
@@ -299,7 +301,7 @@ module.exports = app => {
 
                 mapToArray(mapContent)
                 .then(function(fromRunpy) {
-                    console.log(fromRunpy);
+                    // console.log(fromRunpy);
                     referenceMapConcepts = fromRunpy;
                     allConcepts = concatDiffer(allConcepts, referenceMapConcepts);
 
@@ -407,7 +409,6 @@ module.exports = app => {
 
                 mapToArray(mapContent)
                 .then(function(fromRunpy) {
-                    // referenceMapConcepts = fromRunpy;
                     allConcepts = concatDiffer(allConcepts, referenceMapConcepts);
 
                     debateUnityModel
@@ -425,11 +426,9 @@ module.exports = app => {
                                         mapModel
                                         .findById(mapContent.map._id)
                                         .then(map =>{
-                                            // console.log(map.author.username);
                                             mapToArray(mapContent)
                                             .then(function(fromRunpy2) {
                                                 mapConcepts = fromRunpy2;  
-                                                // console.log(fromRunpy2);
                                                 element.mapsAuthor = map.author;
 
                                                 initialMapConcepts.push({
@@ -447,17 +446,19 @@ module.exports = app => {
                         });
 
                         Promise.all(promises).then(() => {
-                            // console.log('then');
 
                             weightedReference = conceptArrayToBoolean(allConcepts, referenceMapConcepts);
 
                             initialMapConcepts.forEach(element => {
-                                // console.log('set undefined');
                                 element.booleanArray = conceptArrayToBoolean(allConcepts, element.mapConcepts);                               
                                 booleanArrays.push(element.booleanArray);                               
                                 element.debateUnity.initialDistance = computeEuclideanDistance(weightedReference, element.booleanArray);
                                 element.debateUnity.questioner1 = null;
                                 element.debateUnity.questioner2 = null;
+                                element.debateUnity.question1 = null;
+                                element.debateUnity.question2 = null;
+                                element.debateUnity.question3 = null;
+                                element.debateUnity.question4 = null;
                             });
 
                             initialMapConcepts.sort(comparaDistancias);
@@ -475,20 +476,14 @@ module.exports = app => {
 
                             let arrCont = [];
 
-                            console.log("1----------------");
+                            // console.log("1----------------");
                             initialMapConcepts.forEach((element, index) => {
-                                // console.log('initialMapConcepts.forEach 1');
                                 let distances = element.distances; 
                                 let i = 0;
-                                // console.log('-------------');
-                                // console.log('autor: ' + element.debateUnity.mapsAuthor.username);
 
                                 while(element.debateUnity.questioner1._id == undefined && i < distances.length){
-                                    // console.log('while: ' + distances[i].debateUnity.mapsAuthor.username);
                                     let author = distances[i].debateUnity.mapsAuthor;
                                     let quest = initialMapConcepts.find(el => {return el.debateUnity.mapsAuthor._id == author._id});
-                                    // console.log('some: ' + quest); 
-                                    // console.log(initialMapConcepts);
 
                                     let count = arrCont.find(el => { return author._id == el.id });
 
@@ -497,76 +492,43 @@ module.exports = app => {
                                         arrCont.push(count);
                                     }
 
-                                    // console.log('count');
-                                    // console.log(count);
-
                                     if(count.count == 0 && (quest.debateUnity.questioner1._id == undefined || 
                                                             (!quest.debateUnity.questioner1._id.equals(element.debateUnity.mapsAuthor._id) || index == initialMapConcepts.length - 1))){
                                         element.debateUnity.questioner1 = author;
                                         count.count = count.count + 1;
                                         element.distances.splice(i, 1);
-                                        // console.log('questioner1: ' + element.debateUnity.questioner1.username);
-                                        // console.log('questioner2: ' + element.debateUnity.questioner2.username);
                                     }
                                         
                                     i++;
                                 }                                
                             });
 
-                            // console.log(arrCont);
-
-                            console.log("2----------------");
+                            // console.log("2----------------");
                             initialMapConcepts.forEach((element, index) => {
-                            // let index = 0;
-                            // let volta = false;
-                            // let impedido_id = null;
-                            // while(index < initialMapConcepts.length){
-                                // console.log('initialMapConcepts.forEach 1');
-                                // let element = initialMapConcepts[index];
                                 let distances = element.distances; 
                                 let i = 0;
-                                // console.log('-------------');
-                                console.log('autor: ' + element.debateUnity.mapsAuthor.username);
 
                                 while(element.debateUnity.questioner2._id == undefined && i < distances.length){
-                                    console.log('while: ' + distances[i].debateUnity.mapsAuthor.username);
+                                    // console.log('while: ' + distances[i].debateUnity.mapsAuthor.username);
                                     let author = distances[i].debateUnity.mapsAuthor;
                                     let quest = initialMapConcepts.find(el => {return el.debateUnity.mapsAuthor._id == author._id});
 
                                     let count = arrCont.find(el => { return author._id == el.id });
 
-                                    if(count.count == 1 //&& (impedido_id == null || !impedido_id.equals(author._id))
-                                                        && (quest.debateUnity.questioner2._id == undefined || 
+                                    if(count.count == 1 && (quest.debateUnity.questioner2._id == undefined || 
                                                             (!quest.debateUnity.questioner2._id.equals(element.debateUnity.mapsAuthor._id)|| index == initialMapConcepts.length - 1))){
                                         element.debateUnity.questioner2 = author;
                                         count.count = count.count + 1;
-                                        // volta = false;
-                                        // impedido = null;
                                     }
-
-                                    // volta = (i == distances.length - 1 && element.debateUnity.questioner2._id == undefined);
 
                                     i++;
                                 }                             
                             });
-                                // if(!volta)
-                                    // index++;
-                                // else{
-                                //     index--;
-                                //     console.log('impedido: ' + initialMapConcepts[index].debateUnity.questioner2.username);
-                                //     impedido_id = initialMapConcepts[index].debateUnity.questioner2._id;                                    
-                                //     count = arrCont.find(el => { return impedido_id.equals(el.id) });
-                                //     count.count = count.count - 1;
-                                //     initialMapConcepts[index].debateUnity.questioner2 = null;
-                                //     index = 10;
-                                // }                                    
-                            // }
 
                             let promises2 = [];
                             var updatedDebateUnities = [];
 
                             initialMapConcepts.forEach((element, ind, arrayInitial) => {
-                                // console.log(element.debateUnity);
                                 promises2.push(
                                     new Promise(function(resolve, reject){
                                         element.debateUnity.debate.phase = "P";
@@ -580,7 +542,7 @@ module.exports = app => {
                                     })
                                 );
                             });
-                            console.log('-----------');
+                            // console.log('-----------');
                             Promise.all(promises2).then(() => {
                                 debate.phase = "P";
 
