@@ -41,6 +41,9 @@ var schema = mongoose.Schema({
             }
         }
     },
+    phase: {
+        type: String
+    },
     link: {
         rel: {
             type: String

@@ -9,6 +9,9 @@ var schema = mongoose.Schema({
         name: {
             type: String
         },
+        phase:{
+            type: String
+        },
         link: {
             rel: {
                 type: String

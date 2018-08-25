@@ -25,4 +25,8 @@ module.exports = app => {
     app
         .route('/v1/debates/processClustersInitial/debate/:debateId')
         .post(authApi.authenticationRequired, api.findByIdAndProcessClustersInitial);
+
+    app
+        .route('/v1/debates/updatePhaseToAnswer/:debateId')
+        .put(authApi.authenticationRequired, api.updatePhaseToAnswer);
 }
