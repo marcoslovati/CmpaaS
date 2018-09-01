@@ -25,11 +25,14 @@ module.exports = app => {
             let content = JSON.parse(map.content);
             let concepts = [];
 
-            content.nodeDataArray.forEach(elem =>
-                concepts.push(elem.text)
-            );
-
-            let pathFolders = __dirname.split('/');
+            content.nodeDataArray.forEach(elem =>{
+                if(elem.text.length > 4){
+                    concepts.push(elem.text)
+                    console.log(elem.text);
+                }
+            });
+            success(concepts);
+            /*let pathFolders = __dirname.split('/');
             let path = "";
 
             pathFolders.forEach((dir, i) => {
@@ -51,7 +54,7 @@ module.exports = app => {
                 else{
                     success(data[0].split(','));
                 }             
-            }); 
+            });*/ 
         });               
     }       
 
