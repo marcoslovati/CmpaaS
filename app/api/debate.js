@@ -5,6 +5,7 @@ module.exports = app => {
     const kmeans = require('node-kmeans');
     const promise = require("bluebird");
     const pythonShell = require("python-shell");
+    const language = require('@google-cloud/language');
     const userModel = mongoose.model('User');
     const debateModel = mongoose.model('Debate');
     const debateUnityModel = mongoose.model('DebateUnity');
@@ -23,38 +24,110 @@ module.exports = app => {
     let mapToArray = function (map){
         return new Promise(function(success, nosuccess) {
             let content = JSON.parse(map.content);
-            let concepts = [];
+            let ngrams = [];
 
-            content.nodeDataArray.forEach(elem =>{
-                if(elem.text.length > 4){
-                    concepts.push(elem.text)
-                    console.log(elem.text);
-                }
+            let conceptNodes = content.nodeDataArray;
+            let relationLinks = content.linkDataArray;
+
+            const client = new language.LanguageServiceClient();
+
+            const document = {
+                content: "",
+                type: 'PLAIN_TEXT',
+                language: 'PT'
+              };
+
+            let completeText = "";
+
+            conceptNodes.forEach(elem=>{
+                completeText += elem.text + ', ';                
             });
-            success(concepts);
-            /*let pathFolders = __dirname.split('/');
-            let path = "";
 
-            pathFolders.forEach((dir, i) => {
-                if(i < pathFolders.length - 1){
-                    path += dir + '/';
-                }
+            relationLinks.forEach(elem=>{
+                let id1 = elem.from;
+                let id2 = elem.to;
+                let concept1 = conceptNodes.find(e => e.key === id1).text;
+                let concept2 = conceptNodes.find(e => e.key === id2).text;
+                // let proposition = concept1 + ' ' + elem.text + ' ' + concept2;
+                let conceptConcept = concept1 + ' ' + concept2;
+
+                // completeText += proposition + ", ";
+                completeText += conceptConcept + ", ";
             });
 
-            let options = {
-                pythonPath: path + 'plnpython/env/bin/python3',
-                mode: 'text',
-                pythonOptions: ['-u'],
-                scriptPath: path + 'plnpython',
-                args: [concepts]
-            };        
-        
-            pythonShell.run('lemmasfromconcept.py', options, function (err, data) {
-                if (err) console.log(err);
-                else{
-                    success(data[0].split(','));
-                }             
-            });*/ 
+            document.content = completeText.toLowerCase();
+
+            client
+            .analyzeSyntax({document: document})
+            .then(results => {
+                const syntax = results[0];
+                  
+                let ngram = "";
+                syntax.tokens.forEach(part => {
+                    if(part.partOfSpeech.tag === 'NOUN' ||
+                       part.partOfSpeech.tag === 'ADJ'){
+                        ngram += " " + part.lemma;
+                    }
+                    else if(part.partOfSpeech.tag === 'PUNCT'){
+                        ngrams.push(ngram.substring(1));
+                        ngram = "";
+                    } 
+                }); 
+                
+                // console.log(ngrams);
+                success(ngrams);
+
+                // completeText = "";
+
+                // relationLinks.forEach(elem=>{
+                //     let id1 = elem.from;
+                //     let id2 = elem.to;
+                //     let concept1 = conceptNodes.find(e => e.key === id1).text;
+                //     let concept2 = conceptNodes.find(e => e.key === id2).text;
+                //     let proposition = concept1 + ' ' + elem.text + ' ' + concept2;
+                //     let conceptConcept = concept1 + ' ' + concept2;
+
+                //     completeText += proposition + ", ";
+                //     completeText += conceptConcept + ", ";
+                // });
+
+                // document.content = completeText;
+
+                // client
+                // .analyzeSyntax({document: document})
+                // .then(results => {
+                //     const syntax = results[0];
+                    
+                //     let ngram = "";
+                //     syntax.tokens.forEach(part => {
+                //         if(part.partOfSpeech.tag === 'VERB' || 
+                //             part.partOfSpeech.tag === 'NOUN' ||
+                //             part.partOfSpeech.tag === 'ADJ' ||
+                //             part.partOfSpeech.tag === 'ADV' && part.dependencyEdge.label === 'NEG'){
+                //             ngram += " " + part.lemma;
+                //         }
+                //         else if(part.partOfSpeech.tag === 'PUNCT'){
+                //             ngrams.push(ngram.substring(1));
+                //             ngram = "";
+                //         } 
+                //     });
+
+                //     console.log(ngrams);
+                //     success(ngrams);
+                // })
+                // .catch(err => {
+                //     console.error('ERROR:', err);
+                // });                
+            })
+            .catch(err => {
+                console.error('ERROR:', err);
+            });         
+
+            // content.nodeDataArray.forEach(elem =>{
+            //     concepts.push(elem.text)
+            // });
+
+            // success(concepts);
         });               
     }       
 
@@ -63,6 +136,7 @@ module.exports = app => {
             if(!allItems.includes(element))
                 allItems.push(element);
         });
+        // console.log(allItems);
         return allItems;
     }
 
@@ -174,6 +248,7 @@ module.exports = app => {
                 .then(function(fromRunpy) {
                     // console.log(fromRunpy);
                     referenceMapConcepts = fromRunpy;
+                    
                     allConcepts = concatDiffer(allConcepts, referenceMapConcepts);
 
                     debateUnityModel
@@ -217,6 +292,8 @@ module.exports = app => {
                             initialMapConcepts.forEach(element => {                               
                                 element.booleanArray = conceptArrayToBoolean(allConcepts, element.mapConcepts);
                                 element.debateUnity.initialDistance = computeEuclideanDistance(weightedReference, element.booleanArray);
+                                element.debateUnity.questioner1 = null;
+                                element.debateUnity.questioner2 = null;
                                 element.debateUnity.question1 = null;
                                 element.debateUnity.question2 = null;
                                 element.debateUnity.question3 = null;
@@ -412,6 +489,7 @@ module.exports = app => {
 
                 mapToArray(mapContent)
                 .then(function(fromRunpy) {
+                    referenceMapConcepts = fromRunpy;
                     allConcepts = concatDiffer(allConcepts, referenceMapConcepts);
 
                     debateUnityModel
