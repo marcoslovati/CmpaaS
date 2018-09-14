@@ -15,7 +15,8 @@
   "author": "Wagner Perin",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^1.0.3",
+    "@google-cloud/language": "^1.2.0",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.2",
     "compute-euclidean-distance": "^1.0.0",
     "consign": "^0.1.6",
