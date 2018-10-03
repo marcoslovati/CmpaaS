@@ -2,6 +2,7 @@ module.exports = app => {
     const mongoose = require('mongoose');
     const api = {};
     const debateUnityModel = mongoose.model('DebateUnity');
+    const debateModel = mongoose.model('Debate');
     const errorParser = app.helpers.errorParser;
 
     api.create = (req, res) => {
@@ -46,15 +47,11 @@ module.exports = app => {
                     res.status(400).json(errorParser.parse('debateUnities-4', error));
             }
             else{
-                var debateUnity = req.body.debateUnity;
-                if(req.auth.user._id === req.body.debateUnity.questioner1._id){
-                    debateUnity.question1 = req.body.question1;
-                    debateUnity.question2 = req.body.question2;
-                }
-                else {
-                    debateUnity.question3 = req.body.question1;
-                    debateUnity.question4 = req.body.question2;
-                }
+                let debateUnity = req.body.debateUnity;
+                if(req.auth.user._id === req.body.debateUnity.questioner1._id)
+                    debateUnity.questionsQuestioner1 = req.body.questions;                
+                else
+                    debateUnity.questionsQuestioner2 = req.body.questions;
 
                 debateUnityModel
                 .findByIdAndUpdate(debateUnity._id, debateUnity, { new: true })
@@ -95,23 +92,35 @@ module.exports = app => {
     };
 
     api.findByQuestioner = (req, res) => {
-        var id = new mongoose.Types.ObjectId(req.auth.user._id);
+        let id = new mongoose.Types.ObjectId(req.auth.user._id);
 
-        debateUnityModel
-        .find({$or: [{"questioner1._id": id }, {"questioner2._id": id }]})
-        .then(debateUnities => {
-            res.json(debateUnities);
+        debateModel
+        .find({"active" : true})
+        .then(debates => {
+            let idsDebate = debates.map(d => d._id);
+
+            debateUnityModel
+            .find({$or: [{"questioner1._id": id }, {"questioner2._id": id }], "debate._id":{$in: idsDebate}})
+            .then(debateUnities => {
+                res.json(debateUnities);
+            }, error => res.status(500).json(errorParser.parse('debateUnities-1', error)));
         }, error => res.status(500).json(errorParser.parse('debateUnities-1', error)));
     };
 
     api.findByAuthor = (req, res) => {
-        var id = new mongoose.Types.ObjectId(req.auth.user._id);
+        let id = new mongoose.Types.ObjectId(req.auth.user._id);
 
-        debateUnityModel
-        .find({'mapsAuthor._id': id})
-        .then(debateUnities => {
-            res.json(debateUnities);
-        }, error => res.status(500).json(errorParser.parse('debateUnities-1', error)));
+        debateModel
+        .find({"active" : true})
+        .then(debates => {
+            let idsDebate = debates.map(d => d._id);
+
+            debateUnityModel
+            .find({'mapsAuthor._id': id, "debate._id":{$in: idsDebate}})
+            .then(debateUnities => {
+                res.json(debateUnities);
+            }, error => res.status(500).json(errorParser.parse('debateUnities-1', error)));
+        },error => res.status(500).json(errorParser.parse('debateUnities-1', error)));
     };
 
     api.findByDebate = (req, res) => {

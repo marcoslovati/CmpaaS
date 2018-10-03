@@ -197,33 +197,16 @@ module.exports = app => {
             .then(debates => res.json(debates), error => error => res.status(500).json(errorParser.parse('debates-2', error)));
     };
 
-    api.updatePhaseToAnswer = (req, res) => {
+    api.updateStatus = (req, res) => {
         debateModel
         .findById(req.params.debateId)
         .then(debate => {
-            debate.phase = "R";
+            debate.active = !debate.active;
 
             debateModel
             .findByIdAndUpdate(req.params.debateId, debate, { new: true })
             .then(updatedDebate => {
-                debateUnityModel
-                .find({'debate._id' : updatedDebate._id})
-                .then(debateUnities => {                        
-                    debateUnities.forEach(element => {
-                        element.debate.phase = "R";
-
-                        debateUnityModel
-                        .findByIdAndUpdate(element._id, element, { new: true })
-                        .then(updatedDebateUnity => {
-                            // console.log("alterado");                            
-                        });
-                    });
-                });
-
-                res.json({
-                    userMessage: 'Debate updated successfully.',
-                    debate 
-                });
+                res.json(debate);
             });
         }, error => error => res.status(500).json(errorParser.parse('debates-2', error)));
     };

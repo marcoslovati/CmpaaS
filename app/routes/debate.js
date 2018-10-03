@@ -27,6 +27,6 @@ module.exports = app => {
         .post(authApi.authenticationRequired, api.findByIdAndProcessClustersInitial);
 
     app
-        .route('/v1/debates/updatePhaseToAnswer/:debateId')
-        .put(authApi.authenticationRequired, api.updatePhaseToAnswer);
+        .route('/v1/debates/changeStatus/:debateId')
+        .put(authApi.authenticationRequired, api.updateStatus);
 }

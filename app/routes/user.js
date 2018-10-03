@@ -35,8 +35,12 @@ module.exports = app => {
         .get(api.isOfAdministratorsGroup);
 
     app
-        .route('/v1/users/name/:name')
-        .get(api.findByName);
+        .route('/v1/users/username/:username')
+        .get(api.findByUsername);
+
+    app
+        .route('/v1/users/password/:id')
+        .put(api.updatePassword);
     
     app
         .route('/v1/users/:id/join/:groupId')

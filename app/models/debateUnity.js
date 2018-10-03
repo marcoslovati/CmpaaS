@@ -9,9 +9,6 @@ var schema = mongoose.Schema({
         name: {
             type: String
         },
-        phase:{
-            type: String
-        },
         link: {
             rel: {
                 type: String
@@ -72,12 +69,13 @@ var schema = mongoose.Schema({
             }
         }
     },
-    question1: {
-        type: String
-    },
-    question2: {
-        type: String
-    },
+    questionsQuestioner1: [
+        {
+            text: {
+                type: String
+            }
+        }
+    ],
     questioner2: {
         _id: {
             type: mongoose.Schema.Types.ObjectId, 
@@ -95,12 +93,13 @@ var schema = mongoose.Schema({
             }
         }
     },
-    question3: {
-        type: String
-    },
-    question4: {
-        type: String
-    },
+    questionsQuestioner2: [
+        {
+            text: {
+                type: String
+            }
+        }
+    ],
     finalMapContent: {
         _id: {
             type: mongoose.Schema.Types.ObjectId, 

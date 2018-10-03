@@ -110,9 +110,9 @@ module.exports = app => {
             });
     };
 
-    api.findByName = (req, res) => {
+    api.findByUsername = (req, res) => {
         userModel
-            .find({name: new RegExp('^'+req.params.name+'$', "i")})
+            .find({username: new RegExp('^'+req.params.username+'$', "i")})
             .then(users => {
                 if(!users) res.status(404).json(errorParser.parse('users-7', {}))
                 else res.json(users);
@@ -162,6 +162,32 @@ module.exports = app => {
                     else res.status(500).json(errorParser.parse('users-1', error));    
                 });
         }
+    };
+
+    api.updatePassword = (req, res) => {
+        let password = bcrypt.hashSync(req.body.password, 10);
+
+        userModel
+        .findById(req.params.id)
+        .then(user =>{
+            if(!user) res.status(404).json(errorParser.parse('users-7', {}))
+            else{
+                user.password = password;
+
+                userModel
+                .findByIdAndUpdate(req.params.id, user)
+                .then(user => {
+                    if(!user) res.status(404).json(errorParser.parse('users-7', {}))
+                    else res.json({
+                            userMessage: 'The user was updated. ',    
+                            user
+                        });
+                }, error => {
+                    if(error.name == "CastError") res.status(400).json(errorParser.parse('users-5', error))
+                    else res.status(500).json(errorParser.parse('users-1', error));    
+                });
+            }
+        });
     };
 
     api.removeById = (req, res) => {

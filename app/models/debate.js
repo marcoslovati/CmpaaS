@@ -41,8 +41,13 @@ var schema = mongoose.Schema({
             }
         }
     },
-    phase: {
-        type: String
+    keepAuthorsAnonymous: {
+        type: Boolean,
+        default: false
+    },
+    active: {
+        type: Boolean,
+        default: true
     },
     link: {
         rel: {
