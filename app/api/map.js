@@ -54,7 +54,7 @@ module.exports = app => {
 
     api.findByDate = (req, res) => {
         mapModel
-            .find({ '$where': 'this.versions.created.toJSON().slice(0, 10) >= ' + '"' + req.params.mapDate + '"', 'author._id':{'$ne':req.auth.user._id}, 'author._id': { $in: req.body }})
+            .find({ '$where': 'this.created.toJSON().slice(0, 10) >= ' + '"' + req.params.mapDate + '"', 'author._id':{'$ne':req.auth.user._id}, 'author._id': { $in: req.body }})
             .then(maps => res.json(maps), error => error => res.status(500).json(errorParser.parse('maps-1', error)));
     };
 

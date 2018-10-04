@@ -9,6 +9,10 @@ var schema = mongoose.Schema({
         name: {
             type: String
         },
+        keepAuthorsAnonymous: {
+            type: Boolean,
+            default: false
+        },
         link: {
             rel: {
                 type: String

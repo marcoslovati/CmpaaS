@@ -48,10 +48,10 @@ module.exports = app => {
                 let id2 = elem.to;
                 let concept1 = conceptNodes.find(e => e.key === id1).text;
                 let concept2 = conceptNodes.find(e => e.key === id2).text;
-                // let proposition = concept1 + ' ' + elem.text + ' ' + concept2;
+                let proposition = concept1 + ' ' + elem.text + ' ' + concept2;
                 let conceptConcept = concept1 + ' ' + concept2;
 
-                // completeText += proposition + ", ";
+                completeText += proposition + ", ";
                 completeText += conceptConcept + ", ";
             });
 
@@ -65,7 +65,9 @@ module.exports = app => {
                 let ngram = "";
                 syntax.tokens.forEach(part => {
                     if(part.partOfSpeech.tag === 'NOUN' ||
-                       part.partOfSpeech.tag === 'ADJ'){
+                       part.partOfSpeech.tag === 'ADJ' ||
+                       part.partOfSpeech.tag === 'VERB' ||
+                       part.partOfSpeech.tag === 'ADV' && part.dependencyEdge.label === 'NEG'){
                         ngram += " " + part.lemma;
                     }
                     else if(part.partOfSpeech.tag === 'PUNCT'){
@@ -74,60 +76,13 @@ module.exports = app => {
                     } 
                 }); 
                 
-                // console.log(ngrams);
-                success(ngrams);
-
-                // completeText = "";
-
-                // relationLinks.forEach(elem=>{
-                //     let id1 = elem.from;
-                //     let id2 = elem.to;
-                //     let concept1 = conceptNodes.find(e => e.key === id1).text;
-                //     let concept2 = conceptNodes.find(e => e.key === id2).text;
-                //     let proposition = concept1 + ' ' + elem.text + ' ' + concept2;
-                //     let conceptConcept = concept1 + ' ' + concept2;
-
-                //     completeText += proposition + ", ";
-                //     completeText += conceptConcept + ", ";
-                // });
-
-                // document.content = completeText;
-
-                // client
-                // .analyzeSyntax({document: document})
-                // .then(results => {
-                //     const syntax = results[0];
-                    
-                //     let ngram = "";
-                //     syntax.tokens.forEach(part => {
-                //         if(part.partOfSpeech.tag === 'VERB' || 
-                //             part.partOfSpeech.tag === 'NOUN' ||
-                //             part.partOfSpeech.tag === 'ADJ' ||
-                //             part.partOfSpeech.tag === 'ADV' && part.dependencyEdge.label === 'NEG'){
-                //             ngram += " " + part.lemma;
-                //         }
-                //         else if(part.partOfSpeech.tag === 'PUNCT'){
-                //             ngrams.push(ngram.substring(1));
-                //             ngram = "";
-                //         } 
-                //     });
-
-                //     console.log(ngrams);
-                //     success(ngrams);
-                // })
-                // .catch(err => {
-                //     console.error('ERROR:', err);
-                // });                
+                console.log(ngrams);
+                success(ngrams);             
             })
             .catch(err => {
                 console.error('ERROR:', err);
             });         
 
-            // content.nodeDataArray.forEach(elem =>{
-            //     concepts.push(elem.text)
-            // });
-
-            // success(concepts);
         });               
     }       
 
@@ -210,6 +165,35 @@ module.exports = app => {
             });
         }, error => error => res.status(500).json(errorParser.parse('debates-2', error)));
     };
+
+    api.updateAnonymous = (req, res) => {
+        debateModel
+        .findById(req.params.debateId)
+        .then(debate => {
+            debate.keepAuthorsAnonymous = !debate.keepAuthorsAnonymous;
+
+            debateModel
+            .findByIdAndUpdate(req.params.debateId, debate, { new: true })
+            .then(updatedDebate => {
+
+                debateUnityModel
+                .find({'debate._id':req.params.debateId})
+                .then(debateUnities => {
+                    debateUnities.forEach(du => {
+                        du.debate.keepAuthorsAnonymous = !du.debate.keepAuthorsAnonymous;
+
+                        debateUnityModel
+                        .findByIdAndUpdate(du._id, du)
+                        .then(duUp =>{
+                            console.log(duUp);
+                        });
+                    });
+
+                    res.json(updatedDebate);
+                });                
+            });
+        }, error => error => res.status(500).json(errorParser.parse('debates-2', error)));
+    };    
 
     api.findByIdAndProcessLevelsInitial = (req, res) => {
         var allConcepts = [];

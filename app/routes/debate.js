@@ -29,4 +29,8 @@ module.exports = app => {
     app
         .route('/v1/debates/changeStatus/:debateId')
         .put(authApi.authenticationRequired, api.updateStatus);
+
+    app
+        .route('/v1/debates/changeAnonymous/:debateId')
+        .put(authApi.authenticationRequired, api.updateAnonymous);        
 }
