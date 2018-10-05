@@ -170,7 +170,8 @@ module.exports = app => {
         debateModel
         .findById(req.params.debateId)
         .then(debate => {
-            debate.keepAuthorsAnonymous = !debate.keepAuthorsAnonymous;
+            let anon = !debate.keepAuthorsAnonymous;
+            debate.keepAuthorsAnonymous = anon;
 
             debateModel
             .findByIdAndUpdate(req.params.debateId, debate, { new: true })
@@ -180,7 +181,7 @@ module.exports = app => {
                 .find({'debate._id':req.params.debateId})
                 .then(debateUnities => {
                     debateUnities.forEach(du => {
-                        du.debate.keepAuthorsAnonymous = !du.debate.keepAuthorsAnonymous;
+                        du.debate.keepAuthorsAnonymous = anon;
 
                         debateUnityModel
                         .findByIdAndUpdate(du._id, du)
