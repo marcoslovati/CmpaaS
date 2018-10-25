@@ -110,9 +110,11 @@ module.exports = app => {
             });
     };
 
-    api.findByUsername = (req, res) => {
+    api.findByFilter = (req, res) => {
         userModel
-            .find({username: new RegExp('^'+req.params.username+'$', "i")})
+            .find({$or : [{username: new RegExp('^'+req.params.filter+'$', "i")},
+            {name: new RegExp('^'+req.params.filter+'$', "i")},
+            {email: new RegExp('^'+req.params.filter+'$', "i")}]})
             .then(users => {
                 if(!users) res.status(404).json(errorParser.parse('users-7', {}))
                 else res.json(users);
@@ -121,6 +123,18 @@ module.exports = app => {
                 else res.status(500).json(errorParser.parse('users-1', error)); 
             });
     };
+
+    api.findByGroup = (req, res) => {
+        userModel
+            .find({ "groups._id": req.params.groupId})
+            .then(users => {
+                if(!users) res.status(404).json(errorParser.parse('users-7', {}))
+                else res.json(users);
+            }, error => {
+                if(error.name == "CastError") res.status(400).json(errorParser.parse('users-5', error))
+                else res.status(500).json(errorParser.parse('users-1', error)); 
+            });
+    };    
 
     api.isOfAdministratorsGroup = (req, res) => {
         let admGroupName = app.get('adminGroupName');

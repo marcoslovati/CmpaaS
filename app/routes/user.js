@@ -35,8 +35,12 @@ module.exports = app => {
         .get(api.isOfAdministratorsGroup);
 
     app
-        .route('/v1/users/username/:username')
-        .get(api.findByUsername);
+        .route('/v1/users/filter/:filter')
+        .get(api.findByFilter);
+
+    app
+        .route('/v1/users/group/:groupId')
+        .get(api.findByGroup);        
 
     app
         .route('/v1/users/password/:id')

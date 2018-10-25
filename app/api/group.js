@@ -14,6 +14,17 @@ module.exports = app => {
                 req.body.users = [];
                 alertMessage = 'This resource can`t be used to include users on groups. Use the available resources in the users and groups APIs to join or leave groups.';
             }
+            let group = req.body;
+
+            group.admin = {
+                _id: req.auth.user._id,
+                username: req.auth.user.username,
+                link: {
+                    rel: 'User',
+                    href: app.get('userApiRoute') + req.auth.user._id
+                }
+            };
+
             groupModel
                 .create(req.body)
                 .then(group => {
@@ -21,8 +32,7 @@ module.exports = app => {
                         rel: 'self',
                         href: app.get('groupApiRoute') + group._id
                     };
-                    //group.admin = req.auth.user; //The authenticated user is the admin of the group.
-                    group.save();
+
                     res.status(201).json({
                         userMessage: 'Group created successfully. ',
                         alertMessage,

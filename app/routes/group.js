@@ -5,7 +5,7 @@ module.exports = (app) => {
         .route('/v1/groups')
         .post(api.create)
         .get(api.list)
-        .put(api.bulkUpdate)
+        .put(api.update)
         .delete(api.removeAll);
     
     app
