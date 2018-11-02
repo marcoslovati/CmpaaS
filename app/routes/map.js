@@ -8,7 +8,7 @@ module.exports = app => {
         .get(authApi.authenticationRequired, api.list);
 
     app
-        .route('/v1/maps/author')
+        .route('/v1/maps/author/:userId')
         .get(authApi.authenticationRequired, api.findByAuthor);        
     
     app

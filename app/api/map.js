@@ -60,7 +60,8 @@ module.exports = app => {
 
     api.findByAuthor = (req, res) => {
         mapModel
-            .find({'author._id':req.auth.user._id})
+            // .find({'author._id':req.auth.user._id})
+            .find({'author._id':req.params.userId})
             .then(maps => res.json(maps), error => error => res.status(500).json(errorParser.parse('maps-1', error)));
     };
     
