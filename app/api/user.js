@@ -10,6 +10,7 @@ module.exports = app => {
     const multer = require('multer');
     const path = require('path');
     const https = require('https');
+    const nodemailer = require('nodemailer');
 
     api.create = (req, res) => {
         if(!(Object.prototype.toString.call(req.body) === '[object Object]')) res.status(400).json(errorParser.parse('users-10', {}))
@@ -112,9 +113,9 @@ module.exports = app => {
 
     api.findByFilter = (req, res) => {
         userModel
-            .find({$or : [{username: new RegExp('^'+req.params.filter+'$', "i")},
-            {name: new RegExp('^'+req.params.filter+'$', "i")},
-            {email: new RegExp('^'+req.params.filter+'$', "i")}]})
+            .find({$or : [{username: new RegExp(req.params.filter, "i")},
+            {name: new RegExp(req.params.filter, "i")},
+            {email: new RegExp(req.params.filter, "i")}]})
             .then(users => {
                 if(!users) res.status(404).json(errorParser.parse('users-7', {}))
                 else res.json(users);
@@ -123,6 +124,65 @@ module.exports = app => {
                 else res.status(500).json(errorParser.parse('users-1', error)); 
             });
     };
+
+    api.resetPasswordUri = (req, res) => {
+        userModel
+            .findById(req.params.id)
+            .then(user => {
+                if(!user) res.status(404).json(errorParser.parse('users-7', {}))
+                else{
+                    let crypName = bcrypt.hashSync(user.name, 10).substr(3,15);
+                    let crypLogin = bcrypt.hashSync(user.username, 10).substr(0,15);
+                    let join = (crypName + crypLogin).replace(/\\/g, '');            
+
+                    let url = 'http://' + req.headers.host +'/v1/users/resetPassword/' + join + '/' + user._id;
+                }
+            }, error => {
+                if(error.name == "CastError") res.status(400).json(errorParser.parse('users-5', error))
+                else res.status(500).json(errorParser.parse('users-1', error)); 
+            });
+    };
+
+    api.sendEmail = (req, res) => {
+        userModel
+            .findOne({email: req.params.email})
+            .then(user => {
+                if(user){
+
+                    let date = new Date().getTime();
+                    let url = 'http://' + req.headers.host +'/v1/users/resetPasswordForm/' + date + '_' + user._id;
+
+                    let transporter = nodemailer.createTransport({
+                        service: 'gmail',
+                        auth: {
+                        user: 'debatemapas@gmail.com',
+                        pass: 'dEbate@#321'
+                        }
+                    });
+
+                    let mailOptions = {
+                        from: 'debatemapas@gmail.com',
+                        to: user.email,
+                        subject: 'Debate com Mapas - Recuperação de senha',
+                        text: "Clique para resetar sua senha: " + url
+                    };
+                    
+                    transporter.sendMail(mailOptions, function(error, info){
+                        if (error) {
+                        console.log(error);
+                        } else {
+                        res.json(user);
+                        }
+                    });
+                }
+                else{
+                    res.status(404).json(errorParser.parse('users-7', {}));
+                }
+            }, error => {
+                if(error.name == "CastError") res.status(400).json(errorParser.parse('users-5', error))
+                else res.status(500).json(errorParser.parse('users-1', error)); 
+            });            
+    };    
 
     api.findByGroup = (req, res) => {
         userModel
@@ -162,8 +222,11 @@ module.exports = app => {
                 req.body.groups = [];
                 alertMessage = 'This resource can`t be used to make changes to the group list. Use the available resources in the users and groups APIs to join or leave groups.';
             }
+
+            let user = req.body;
+            user.password = bcrypt.hashSync(user.password, 10);
             userModel
-                .findByIdAndUpdate(req.params.id, req.body, { new: true }).select('-password')
+                .findByIdAndUpdate(req.params.id, user, { new: true })
                 .then(user => {
                     if(!user) res.status(404).json(errorParser.parse('users-7', {}))
                     else res.json({
@@ -176,6 +239,117 @@ module.exports = app => {
                     else res.status(500).json(errorParser.parse('users-1', error));    
                 });
         }
+    };
+    
+    api.resetPasswordForm = (req, res) => {
+        let param = req.params.parameter.split('_');
+        let date = param[0];
+        let id = param[1];
+
+        let dateNow = new Date().getTime();
+        let dateNumber = Number(date);
+
+        if(dateNow <= dateNumber + 1000 * 60 * 60 * 2){
+            userModel
+            .findById(id)
+            .then(user => {
+                if(!user) res.status(404).json(errorParser.parse('users-7', {}))
+                else{                   
+
+                    let join = Buffer.from(user.name + user.created.toString()).toString("base64"); 
+                    console.log(user.name + user.created.toString());
+                    console.log(join);
+
+                    let url = 'http://' + req.headers.host +'/v1/users/resetPassword/' + join + '/' + user._id;
+                    let login = user.username;
+
+                    let form = "<html>" + 
+                    "<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'>" +               
+                    "<div class='form-group'>" +
+                    "<div class='col-md-3'><label for='login'>Login:</label><input type='text' id='login' class='form-control' value='" + login + "' readonly /></div>" + 
+                    "<div class='col-md-3'><label for='password'>Senha:</label><input type='password' id='password' class='form-control' /></div>" + 
+                    "<div class='col-md-3'><label for='confirm-password'>Confirma&ccedil;&atilde;o da senha:</label><input type='password' id='confirm-password' class='form-control' /></div>" +                     
+                    "<div class='col-md-3'><br /><button id='button-salvar' class='btn btn-primary' onclick='salvar()'>Salvar</button></div>" +
+                    "</div>" +
+                    "<div class='col-md-12 form-group'><p id='mensagem' style='color: red'></p><p id='mensagemOk' style='color: green'></p></div>" + 
+                    "</html>" +
+                    "<script>" +
+                    "function salvar(){" +
+                    "var senha = document.getElementById('password').value;" +
+                    "var confirmacao = document.getElementById('confirm-password').value;" +
+                    "console.log(senha);" +
+                    "console.log(confirmacao);" +
+                    "document.getElementById('mensagem').innerHTML = '';" +
+                    "document.getElementById('mensagemOk').innerHTML = '';" +
+                    "if(!senha){" +
+                    "document.getElementById('mensagem').innerHTML = 'Preencha a senha';" +
+                    "}" +
+                    "else if(senha != confirmacao){" +
+                    "document.getElementById('mensagem').innerHTML = 'Senha e confirma&ccedil;&atilde;o n&atilde;o s&atilde;o iguais';" +
+                    "}" +
+                    "else{" +
+                    "var xhttp = new XMLHttpRequest();" +
+                    "xhttp.onreadystatechange = function() {" +
+                    "if (this.readyState == 4 && this.status == 200) {" +
+                    "document.getElementById('mensagemOk').innerHTML = 'Senha alterada com sucesso!';" +
+                    "}" +
+                    "};" +
+                    "xhttp.open('PUT', '" + url + "', true);" +
+                    "xhttp.setRequestHeader('Content-Type', 'application/json');" +
+                    "xhttp.send(JSON.stringify({password:senha}));" +
+                    "}" +
+                    "}" +
+                    "</script>";
+                    res.end(form);
+                }
+            }, error => {
+                if(error.name == "CastError") res.status(400).json(errorParser.parse('users-5', error))
+                else res.status(500).json(errorParser.parse('users-1', error)); 
+            });
+        } 
+        else{
+            let form = "<html>" + 
+                       "<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'>" +
+                       "<div class='panel'>" +
+                       "<p class='text-center text-danger'>O prazo para alterar a senha expirou. Clique em 'Esqueci a senha' novamente para receber um novo link.</p>" +
+                       "<\div>" +
+                       "</html>";
+            res.end(form);
+        }       
+    };
+
+    api.updatePasswordFromEmail = (req, res) => {       
+
+        userModel
+        .findById(req.params.id)
+        .then(user =>{
+            if(!user) res.status(404).json(errorParser.parse('users-7', {}))
+            else{
+
+                let join = Buffer.from(user.name + user.created.toString()).toString("base64"); 
+
+                if(join === req.params.crypt){
+                    let password = req.body.password;
+                    user.password = bcrypt.hashSync(password, 10);
+                    console.log('dfsdfsdfsdfsdfsf');
+                    userModel
+                    .findByIdAndUpdate(req.params.id, user)
+                    .then(user => {
+                        if(!user) res.status(404).json(errorParser.parse('users-7', {}))
+                        else res.json({
+                                userMessage: 'The user was updated. ',    
+                                user
+                            });
+                    }, error => {
+                        if(error.name == "CastError") res.status(400).json(errorParser.parse('users-5', error))
+                        else res.status(500).json(errorParser.parse('users-1', error));    
+                    });
+                }
+                else{
+                    res.status(404).json(errorParser.parse('users-7', {}));
+                }
+            }
+        });
     };
 
     api.updatePassword = (req, res) => {

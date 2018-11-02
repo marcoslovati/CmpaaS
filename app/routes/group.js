@@ -3,34 +3,34 @@ module.exports = (app) => {
     var authApi = app.api.auth;
     app
         .route('/v1/groups')
-        .post(api.create)
-        .get(api.list)
-        .put(api.update)
-        .delete(api.removeAll);
+        .post(authApi.authenticationRequired, api.create)
+        .get(authApi.authenticationRequired, api.list)
+        .put(authApi.authenticationRequired, api.update)
+        .delete(authApi.authenticationRequired, api.removeAll);
     
     app
         .route('/v1/groups/:id')
-        .post(api.notAllowed)
-        .get(api.findById)
-        .put(api.update)
-        .delete(api.removeById);
+        .post(authApi.authenticationRequired, api.notAllowed)
+        .get(authApi.authenticationRequired, api.findById)
+        .put(authApi.authenticationRequired, api.update)
+        .delete(authApi.authenticationRequired, api.removeById);
 
     app
         .route('/v1/groups/admin/:adminId')
-        .get(api.findByAdmin);        
+        .get(authApi.authenticationRequired, api.findByAdmin);        
     
     app
         .route('/v1/groups/:groupId/include')
-        .post(api.notAllowed)
-        .get(api.notAllowed)
-        .put(api.include)
-        .delete(api.notAllowed);
+        .post(authApi.authenticationRequired, api.notAllowed)
+        .get(authApi.authenticationRequired, api.notAllowed)
+        .put(authApi.authenticationRequired, api.include)
+        .delete(authApi.authenticationRequired, api.notAllowed);
     
     app
         .route('/v1/groups/:groupId/remove')
-        .post(api.notAllowed)
-        .get(api.notAllowed)
-        .put(api.remove)
-        .delete(api.notAllowed);
+        .post(authApi.authenticationRequired, api.notAllowed)
+        .get(authApi.authenticationRequired, api.notAllowed)
+        .put(authApi.authenticationRequired, api.remove)
+        .delete(authApi.authenticationRequired, api.notAllowed);
 
 }

@@ -15,7 +15,7 @@ module.exports = app => {
                 alertMessage = 'This resource can`t be used to include users on groups. Use the available resources in the users and groups APIs to join or leave groups.';
             }
             let group = req.body;
-
+            console.log(req.auth);
             group.admin = {
                 _id: req.auth.user._id,
                 username: req.auth.user.username,

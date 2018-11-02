@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 var consign = require('consign');
 var bodyParser = require('body-parser');
+var frontRoot = 'http://localhost:4200';
 
 app.use(express.static('./public'));
 
@@ -10,7 +11,7 @@ app.use(bodyParser.json());
 app.use(function (req, res, next) {
 
     // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
+    res.setHeader('Access-Control-Allow-Origin', frontRoot);
 
     // Request methods you wish to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');

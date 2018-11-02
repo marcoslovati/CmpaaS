@@ -5,9 +5,9 @@ module.exports = app => {
     app
         .route('/v1/users')
         .post(api.create)
-        .get(api.list)
-        .put(api.bulkUpdate)
-        .delete(api.removeAll);
+        .get(authApi.authenticationRequired, api.list)
+        .put(authApi.authenticationRequired, api.bulkUpdate)
+        .delete(authApi.authenticationRequired, api.removeAll);
     
     app.route('/v1/users/facebook')
         .post(api.fbCreate)
@@ -25,38 +25,43 @@ module.exports = app => {
 
     app
         .route('/v1/users/:id')
-        .post(api.notAllowed)
-        .get(api.findById)
-        .put(api.update)
-        .delete(api.removeById);
+        .get(authApi.authenticationRequired, api.findById)
+        .put(authApi.authenticationRequired, api.update)
+        .delete(authApi.authenticationRequired, api.removeById);
 
     app
         .route('/v1/users/:id/isOfAdministratorsGroup')
-        .get(api.isOfAdministratorsGroup);
+        .get(authApi.authenticationRequired, api.isOfAdministratorsGroup);
 
     app
         .route('/v1/users/filter/:filter')
-        .get(api.findByFilter);
+        .get(authApi.authenticationRequired, api.findByFilter);
 
     app
         .route('/v1/users/group/:groupId')
-        .get(api.findByGroup);        
+        .get(authApi.authenticationRequired, api.findByGroup);        
 
     app
         .route('/v1/users/password/:id')
-        .put(api.updatePassword);
+        .put(authApi.authenticationRequired, api.updatePassword);
+
+    app
+        .route('/v1/users/resetPassword/:crypt/:id')
+        .put(api.updatePasswordFromEmail);
+
+    app
+        .route('/v1/users/resetPasswordForm/:parameter')
+        .get(api.resetPasswordForm);
+
+    app
+        .route('/v1/users/email/:email')
+        .post(api.sendEmail);        
     
     app
         .route('/v1/users/:id/join/:groupId')
-        .post(api.notAllowed)
-        .get(api.notAllowed)
-        .put(api.joinGroup)
-        .delete(api.notAllowed);
+        .put(authApi.authenticationRequired, api.joinGroup);
     
     app
         .route('/v1/users/:id/leave/:groupId')
-        .post(api.notAllowed)
-        .get(api.notAllowed)
-        .put(api.leaveGroup)
-        .delete(api.notAllowed);
+        .put(authApi.authenticationRequired, api.leaveGroup);
 }
