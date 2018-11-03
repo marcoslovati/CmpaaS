@@ -297,7 +297,6 @@ module.exports = app => {
                             initialMapConcepts.forEach((element, ind, arrayInitial) => {
                                 promises2.push(
                                     new Promise(function(resolve, reject){
-                                        element.debateUnity.debate.phase = "P";
 
                                         debateUnityModel
                                         .findByIdAndUpdate(element.debateUnity._id, element.debateUnity, { new: true })
@@ -310,7 +309,6 @@ module.exports = app => {
                             });
 
                             Promise.all(promises2).then(() => {
-                                debate.phase = "P";
 
                                 debateModel
                                 .findByIdAndUpdate(req.params.debateId, debate, { new: true })
@@ -406,7 +404,6 @@ module.exports = app => {
                             finalMapConcepts.forEach((element, ind, arrayFinal) => {
                                 promises2.push(
                                     new Promise(function(resolve, reject){
-                                        element.debateUnity.debate.phase = "C";
 
                                         debateUnityModel
                                         .findByIdAndUpdate(element.debateUnity._id, element.debateUnity, { new: true })
@@ -419,7 +416,6 @@ module.exports = app => {
                             });
 
                             Promise.all(promises2).then(() => {
-                                debate.phase = "C";
 
                                 debateModel
                                 .findByIdAndUpdate(req.params.debateId, debate, { new: true })
@@ -523,7 +519,7 @@ module.exports = app => {
                                 element.distances.sort(comparaDistanciasReverso);
                             });
 
-                            let arrCont = [];
+                            let arrCont = [];                            
 
                             // console.log("1----------------");
                             initialMapConcepts.forEach((element, index) => {
@@ -549,10 +545,13 @@ module.exports = app => {
                                     }
                                         
                                     i++;
-                                }                                
-                            });
+                                }
+                            }); 
 
-                            // console.log("2----------------");
+                            // while(noQuestioner2){
+                                // console.log("2----------------");
+                            let noQuestioner2 = false;
+
                             initialMapConcepts.forEach((element, index) => {
                                 let distances = element.distances; 
                                 let i = 0;
@@ -571,42 +570,47 @@ module.exports = app => {
                                     }
 
                                     i++;
-                                }                             
+                                }
+                                
+                                noQuestioner2 = element.debateUnity.questioner2._id == undefined;                                   
                             });
+                            
+                            if(noQuestioner2){
+                                res.status(500).json(errorParser.parse('debates-2', {}));
+                            }
+                            else{
 
-                            let promises2 = [];
-                            var updatedDebateUnities = [];
+                                let promises2 = [];
+                                var updatedDebateUnities = [];
 
-                            initialMapConcepts.forEach((element, ind, arrayInitial) => {
-                                promises2.push(
-                                    new Promise(function(resolve, reject){
-                                        element.debateUnity.debate.phase = "P";
+                                initialMapConcepts.forEach((element, ind, arrayInitial) => {
+                                    promises2.push(
+                                        new Promise(function(resolve, reject){
 
-                                        debateUnityModel
-                                        .findByIdAndUpdate(element.debateUnity._id, element.debateUnity, { new: true })
-                                        .then(updatedDebateUnity => {
-                                            updatedDebateUnities.push(updatedDebateUnity);
-                                            resolve();
+                                            debateUnityModel
+                                            .findByIdAndUpdate(element.debateUnity._id, element.debateUnity, { new: true })
+                                            .then(updatedDebateUnity => {
+                                                updatedDebateUnities.push(updatedDebateUnity);
+                                                resolve();
+                                            });
+                                        })
+                                    );
+                                });
+                                // console.log('-----------');
+                                Promise.all(promises2).then(() => {
+                                    debateModel
+                                    .findByIdAndUpdate(req.params.debateId, debate, { new: true })
+                                    .then(updatedDebate => {
+                                        console.log('resposta');
+
+                                        res.json({
+                                            userMessage: 'Debate processed successfully. ',
+                                            updatedDebateUnities 
                                         });
-                                    })
-                                );
-                            });
-                            // console.log('-----------');
-                            Promise.all(promises2).then(() => {
-                                debate.phase = "P";
-
-                                debateModel
-                                .findByIdAndUpdate(req.params.debateId, debate, { new: true })
-                                .then(updatedDebate => {
-                                    console.log('resposta');
-
-                                    res.json({
-                                        userMessage: 'Debate processed successfully. ',
-                                        updatedDebateUnities 
                                     });
                                 });
-                            });
-                        });                       
+                            }
+                        });                      
                     });
                 });
             });
