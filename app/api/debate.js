@@ -13,11 +13,11 @@ module.exports = app => {
     const mapModel = mongoose.model('Map');   
     const errorParser = app.helpers.errorParser;
 
-    var comparaDistancias = function (a, b){
+    let comparaDistancias = function (a, b){
         return a.debateUnity.initialDistance > b.debateUnity.initialDistance;
     }
 
-    var comparaDistanciasReverso = function (a, b){
+    let comparaDistanciasReverso = function (a, b){
         return a.distance < b.distance;
     }
 
@@ -26,8 +26,8 @@ module.exports = app => {
             let content = JSON.parse(map.content);
             let ngrams = [];
 
-            let conceptNodes = content.nodeDataArray;
-            let relationLinks = content.linkDataArray;
+            let nodes = content.nodeDataArray;
+            let links = content.linkDataArray;
 
             const client = new language.LanguageServiceClient();
 
@@ -39,28 +39,56 @@ module.exports = app => {
 
             let completeText = "";
 
-            conceptNodes.forEach(elem=>{
-                completeText += elem.text + ', ';                
+            nodes.forEach(elem=>{
+                if(elem.category === 'concept')
+                    completeText += elem.text + ', ';                
             });
 
-            relationLinks.forEach(elem=>{
+            let propositions = [];
+            let conceptConcepts = [];
+
+            links.forEach(elem=>{
                 let id1 = elem.from;
                 let id2 = elem.to;
-                let concept1 = conceptNodes.find(e => e.key === id1).text;
-                let concept2 = conceptNodes.find(e => e.key === id2).text;
-                let proposition = concept1 + ' ' + elem.text + ' ' + concept2;
-                let conceptConcept = concept1 + ' ' + concept2;
+                let node1 = nodes.find(e => e.key === id1);
+                let node2 = nodes.find(e => e.key === id2);
 
-                completeText += proposition + ", ";
-                completeText += conceptConcept + ", ";
+                let proposition = "";
+                let conceptConcept = "";
+
+                if(node1.category === "concept" && node2.category === "relation"){
+                    let elem2 = links.find(e => e.from === node2.key);
+                    let concept2 = nodes.find(e => e.key === elem2.to);
+                    proposition = node1.text + " " + node2.text + " " + concept2.text;
+                    conceptConcept = node1.text + " " + concept2.text;
+                }
+                else if(node1.category === "relation" && node2.category === "concept"){
+                    let elem2 = links.find(e => e.to === node1.key);
+                    let concept1 = nodes.find(e => e.key === elem2.from);
+                    proposition = concept1.text + " " + node1.text + " " + node2.text;
+                    conceptConcept = concept1.text + " " + node2.text;
+                }
+
+                propositions.push(proposition);
+                conceptConcepts.push(conceptConcept);
             });
+
+            function onlyUnique(value, index, self) { 
+                return self.indexOf(value) === index;
+            }
+
+            propositions = propositions.filter(onlyUnique);
+            conceptConcepts = conceptConcepts.filter(onlyUnique);
+
+            completeText += propositions.join(', ');
+            completeText += ', ' + conceptConcepts.join(', ') + ',';
 
             document.content = completeText.toLowerCase();
 
             client
             .analyzeSyntax({document: document})
             .then(results => {
-                const syntax = results[0];
+                const syntax = results[0];                
                   
                 let ngram = "";
                 syntax.tokens.forEach(part => {
@@ -91,7 +119,6 @@ module.exports = app => {
             if(!allItems.includes(element))
                 allItems.push(element);
         });
-        // console.log(allItems);
         return allItems;
     }
 
@@ -364,26 +391,32 @@ module.exports = app => {
                                     .findById(element.finalMapContent._id)
                                     .then(mapContent =>{
 
-                                        mapModel
-                                        .findById(mapContent.map._id)
-                                        .then(map =>{
+                                        if(mapContent){
+                                            mapModel
+                                            .findById(mapContent.map._id)
+                                            .then(map =>{
 
-                                            mapToArray(mapContent)
-                                            .then(function(fromRunpy2) {
-                                                mapConcepts = fromRunpy2;  
-                                            
-                                                element.mapsAuthor = map.author;
-
-                                                finalMapConcepts.push({
-                                                    "debateUnity":element,
-                                                    "mapConcepts": mapConcepts
-                                                });
-                
-                                                allConcepts = concatDiffer(allConcepts, mapConcepts);
+                                                mapToArray(mapContent)
+                                                .then(function(fromRunpy2) {
+                                                    mapConcepts = fromRunpy2;  
                                                 
-                                                resolve();
-                                            });
-                                        });                                    
+                                                    element.mapsAuthor = map.author;
+
+                                                    finalMapConcepts.push({
+                                                        "debateUnity":element,
+                                                        "mapConcepts": mapConcepts
+                                                    });
+                    
+                                                    allConcepts = concatDiffer(allConcepts, mapConcepts);
+                                                    
+                                                    resolve();
+                                                });
+                                            });  
+                                        }
+                                        else{
+                                            res.status(500).json(errorParser.parse('debateUnities-2', {}));
+                                            resolve();
+                                        }                                  
                                     });
                                 })
                             );
