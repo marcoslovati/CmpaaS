@@ -327,7 +327,7 @@ module.exports = app => {
                 if(join === req.params.crypt){
                     let password = req.body.password;
                     user.password = bcrypt.hashSync(password, 10);
-                    userModelF
+                    userModel
                     .findByIdAndUpdate(req.params.id, user)
                     .then(user => {
                         if(!user) res.status(404).json(errorParser.parse('users-7', {}))
