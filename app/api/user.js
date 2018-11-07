@@ -257,8 +257,6 @@ module.exports = app => {
                 else{                   
 
                     let join = Buffer.from(user.name + user.created.toString()).toString("base64"); 
-                    console.log(user.name + user.created.toString());
-                    console.log(join);
 
                     let url = 'http://' + req.headers.host +'/v1/users/resetPassword/' + join + '/' + user._id;
                     let login = user.username;
@@ -277,8 +275,6 @@ module.exports = app => {
                     "function salvar(){" +
                     "var senha = document.getElementById('password').value;" +
                     "var confirmacao = document.getElementById('confirm-password').value;" +
-                    "console.log(senha);" +
-                    "console.log(confirmacao);" +
                     "document.getElementById('mensagem').innerHTML = '';" +
                     "document.getElementById('mensagemOk').innerHTML = '';" +
                     "if(!senha){" +
@@ -331,8 +327,7 @@ module.exports = app => {
                 if(join === req.params.crypt){
                     let password = req.body.password;
                     user.password = bcrypt.hashSync(password, 10);
-                    console.log('dfsdfsdfsdfsdfsf');
-                    userModel
+                    userModelF
                     .findByIdAndUpdate(req.params.id, user)
                     .then(user => {
                         if(!user) res.status(404).json(errorParser.parse('users-7', {}))
