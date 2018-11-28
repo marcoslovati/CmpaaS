@@ -4,7 +4,6 @@ var consign = require('consign');
 var bodyParser = require('body-parser');
 var os = require('os');
 var frontRoot = os.hostname() === "cmpaas" ? 'http://knowledgeportal.inf.ufes.br:4200' : 'http://localhost:4200';
-console.log(os.hostname());
 
 app.use(express.static('./public'));
 
