@@ -293,6 +293,30 @@ module.exports = app => {
                     devMessage: errorObject
                 };
                 break;
+            case 'activities-1':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('activityApiErrorsRoute'),
+                    userMessage: 'The request body is incorrect.',
+                    devMessage: 'This resource spect a object in the body request.'
+                };
+                break;
+            case 'activities-2':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('activityApiErrorsRoute'),
+                    userMessage: 'Bad request: ' + errorObject.errmsg,
+                    devMessage: errorObject
+                };
+                break;
+            case 'activities-3':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('activityApiErrorsRoute'),
+                    userMessage: 'Internal server error: ' + errorObject.message,
+                    devMessage: errorObject
+                };
+                break;
             case 'mapContent-1':
                 error = {
                     errorCode,

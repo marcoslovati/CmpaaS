@@ -27,6 +27,40 @@ var schema = mongoose.Schema({
                 }
             }
     },
+    activity: {
+        _id: {
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'Activity'
+        },
+        name: {
+            type: String
+        },
+        link: {
+            rel: {
+                type: String
+            },
+            href: {
+                type: String
+            }
+        }
+    },
+    group: {
+        _id: {
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'Group'
+        },
+        name: {
+            type: String
+        },
+        link: {
+            rel: {
+                type: String
+            },
+            href: {
+                type: String
+            }
+        }
+    },
     referenceMapContent:{
         _id: {
             type: mongoose.Schema.Types.ObjectId, 

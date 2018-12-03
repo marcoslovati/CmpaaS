@@ -54,6 +54,29 @@ var schema = mongoose.Schema({
             }
         }
     ],
+    activities: [
+        {
+            _id: {
+                type: mongoose.Schema.Types.ObjectId, 
+                ref: 'Activity'
+            },
+            name: {
+                type: String
+            },
+            link: {
+                rel: {
+                    type: String
+                },
+                href: {
+                    type: String
+                }
+            }
+        }
+    ],
+    active: {
+        type: Boolean,
+        default: true
+    },
     link: {
         rel: {
             type: String

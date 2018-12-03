@@ -40,6 +40,7 @@ app.set('groupApiErrorsRoute', '/v1/errors/groups/');
 app.set('authApiRoute', '/v1/auth/');
 app.set('debateApiRoute', '/v1/debates/');
 app.set('debateUnityApiRoute', '/v1/debateUnities/');
+app.set('activityApiRoute', '/v1/activity/');
 app.set('authApiErrorsRoute', '/v1/errors/auth/');
 app.set('mapApiRoute', '/v1/maps/');
 app.set('mapApiErrorsRoute', '/v1/errors/maps/');

@@ -35,6 +35,23 @@ var schema = mongoose.Schema({
             }
         }
     },
+    activity: {
+        _id: {
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'Activity'
+        },
+        name: {
+            type: String
+        },
+        link: {
+            rel: {
+                type: String
+            },
+            href: {
+                type: String
+            }
+        }
+    },
     link: {
         rel: {
             type: String
