@@ -10,10 +10,6 @@ var schema = mongoose.Schema({
         type: String,
         required: true
     },
-    isPublic: {
-        type: Boolean,
-        default: true
-    },
     created: {
         type: Date,
         default: Date.now

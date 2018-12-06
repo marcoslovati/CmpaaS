@@ -4,7 +4,7 @@ module.exports = app => {
 
     app
         .route('/v1/mapContent')
-        .post(authApi.authenticationRequired, api.create);
+        .post(authApi.authenticationRequired, api.createOrUpdate);
     
     app
         .route('/v1/mapContents/:mapContentId')

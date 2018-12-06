@@ -5,28 +5,50 @@ module.exports = app => {
     const mapContentModel = mongoose.model('MapContent');
     const errorParser = app.helpers.errorParser;
     
-    api.create = (req, res) => {
-        mapContentModel
-            .create(req.body)
-            .then(mapContent => {
-                mapContent.link = {
-                    rel: 'mapContent',
-                    href: app.get('mapContentApiRoute') + mapContent._id
-                };
+    api.createOrUpdate = (req, res) => {
+        let mapContent = req.body;
+        console.log(mapContent);
 
-                mapContent.save();
-                
-                mapModel
-                    .findById(req.body.map._id)
+        mapContentModel
+        .find({"map._id": mapContent.map._id, "version": mapContent.version})
+        .then(mapContentFinded => {
+            if(mapContentFinded){
+                mapContentFinded.content = mapContent.content;
+                mapContentFinded.save();
+
+                res.status(200).json({
+                    userMessage: 'Map updated successfully. ',
+                    mapContent: mapContentFinded
+                });
+            }
+            else{
+                mapContent._id = undefined;
+
+                mapContentModel
+                .create(mapContent)
+                .then(mapContentCreated => {
+                    mapContentCreated.link = {
+                        rel: 'mapContent',
+                        href: app.get('mapContentApiRoute') + mapContent._id
+                    };
+    
+                    mapContentCreated.save();
+
+                    mapModel
+                    .findById(mapContent.map._id)
                     .then(map => {
-                        map.versions.push(mapContent);
+                        map.versions.push(mapContentCreated);
                         map.save();
                     }, error => res.status(500).json(errorParser.parse('mapContent-1', error)));
-                res.status(201).json({
-                    userMessage: 'Map created successfully. ',
-                    mapContent
+
+                    res.status(201).json({
+                        userMessage: 'Map created successfully. ',
+                        mapContent: mapContentCreated
+                    });
                 });
-            }, error => res.status(500).json(errorParser.parse('mapContent-2', error)));
+            } 
+
+        }, error => res.status(500).json(errorParser.parse('mapContent-2', error)));
     };
 
     api.getContent = (req, res) => {

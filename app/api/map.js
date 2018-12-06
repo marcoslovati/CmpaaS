@@ -65,32 +65,61 @@ module.exports = app => {
             .then(maps => res.json(maps), error => error => res.status(500).json(errorParser.parse('maps-1', error)));
     };
     
-    api.createContent = (req, res) => {
+    api.createOrUpdateContent = (req, res) => {
         //req.params.mapId req.body.content
-        let saveObject = {};
-        saveObject.map = {};
-        saveObject.map._id = req.params.mapId;
-        saveObject.map.link = {};
-        saveObject.map.link.rel = 'map';
-        saveObject.map.link.href = '/v1/maps/'+req.params.mapId;
-        saveObject.content = req.body.content
+        let mapContent = {};
+        mapContent.map = {};
+        mapContent.map._id = req.params.mapId;
+        mapContent.map.link = {};
+        mapContent.map.link.rel = 'map';
+        mapContent.map.link.href = '/v1/maps/'+req.params.mapId;
+        mapContent.content = req.body.content;
+        mapContent.version = req.body.version;
+        mapContent._id = req.body._id;
+
+        console.log(mapContent);
+
         mapContentModel
-            .create(saveObject)
-            .then(mapContent => {
-                mapContent.link = {
-                    rel: 'mapContent',
-                    href: app.get('mapApiRoute') + req.params.mapId + "/content/" + mapContent._id
-                };
+        .findOne({"map._id": mapContent.map._id, "version": mapContent.version})
+        .then(mapContentFinded => {
+            console.log(mapContentFinded);
+            if(mapContentFinded){
+                mapContentFinded.content = mapContent.content;
+                mapContentFinded.save();
 
-                mapModel
-                    .findById(req.params.mapId)
+                res.status(200).json({
+                    userMessage: 'Map updated successfully. ',
+                    mapContent: mapContentFinded
+                });
+            }
+            else{
+                mapContent._id = undefined;
+
+                mapContentModel
+                .create(mapContent)
+                .then(mapContentCreated => {
+                    mapContentCreated.link = {
+                        rel: 'mapContent',
+                        href: app.get('mapContentApiRoute') + mapContentCreated._id
+                    };
+    
+                    mapContentCreated.save();
+
+                    mapModel
+                    .findById(mapContentCreated.map._id)
                     .then(map => {
-                        map.versions.push(mapContent);
+                        map.versions.push(mapContentCreated);
                         map.save();
-                    });
+                    }, error => res.status(500).json(errorParser.parse('mapContent-1', error)));
 
-                res.json(mapContent);
-            });
+                    res.status(201).json({
+                        userMessage: 'Map created successfully. ',
+                        mapContent: mapContentCreated
+                    });
+                });
+            } 
+
+        }, error => res.status(500).json(errorParser.parse('mapContent-2', error)));
     };
 
     return api;

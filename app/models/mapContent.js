@@ -19,6 +19,10 @@ var schema = mongoose.Schema({
             }
         }
     },
+    version:{
+        type: Number,
+        required: true
+    },
     content: {
         type: mongoose.Schema.Types.Mixed
     },
@@ -29,9 +33,6 @@ var schema = mongoose.Schema({
         href: {
             type: String
         }
-    },
-    image: {
-        type: mongoose.Schema.Types.Mixed
     }
 }, { usePushEach: true });
 
