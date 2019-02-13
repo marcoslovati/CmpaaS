@@ -3,6 +3,7 @@ module.exports = app => {
     const mongoose = require('mongoose');
     const api = {};
     const activityModel = mongoose.model('Activity');
+    const groupModel = mongoose.model('Grouṕ');
     const errorParser = app.helpers.errorParser;
 
     api.create = (req, res) => {
@@ -60,6 +61,30 @@ module.exports = app => {
                     if(error.name == "CastError") res.status(400).json(errorParser.parse('activities-2', error));
                     else res.status(500).json(errorParser.parse('activities-3', error));
             });
+    };
+
+    api.findByUserId = (req, res) => {
+        let dataAtual = new Date();
+        dataAtual.setHours(0,0,0,0);
+
+        groupModel
+            .find({'users._id': req.auth.user._id})
+            .then(groups =>{
+                activityModel
+                .find({
+                    active: true, 
+                    '$where': 'this.startDate.toJSON().slice(0, 10) <= ' + '"' + dataAtual + 
+                    '" && this.endDate.toJSON().slice(0, 10) >= ' + '"' + dataAtual + '"',
+                    'groups._id': { $in: groups._id }
+                })
+                .then(activities => {
+                    if(!activities) res.status(404).json(errorParser.parse('activities-1', {}))
+                    else res.json(activities);
+                }, error => {
+                        if(error.name == "CastError") res.status(400).json(errorParser.parse('activities-2', error));
+                        else res.status(500).json(errorParser.parse('activities-3', error));
+                });
+            });            
     };
 
     api.findByCreator = (req, res) => {

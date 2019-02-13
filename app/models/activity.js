@@ -14,6 +14,18 @@ var schema = mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    startDate: {
+        type: Date,
+        default: Date.now
+    },
+    endDate: {
+        type: Date,
+        default: Date.now
+    },
+    active: {
+        type: Boolean,
+        default: true
+    },
     creator: {
             _id: {
                 type: mongoose.Schema.Types.ObjectId, 
@@ -31,6 +43,25 @@ var schema = mongoose.Schema({
                 }
             }
     },
+    groups: [
+        {
+            _id: {
+                type: mongoose.Schema.Types.ObjectId, 
+                ref: 'Group'
+            },
+            name: {
+                type: String
+            },
+            link: {
+                rel: {
+                    type: String
+                },
+                href: {
+                    type: String
+                }
+            }
+        }
+    ],
     link: {
         rel: {
             type: String

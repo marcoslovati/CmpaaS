@@ -15,4 +15,8 @@ module.exports = app => {
     app
         .route('/v1/activities/name/:name')
         .get(authApi.authenticationRequired, api.findByName);
+
+    app
+        .route('/v1/activities/user/:userId')
+        .get(authApi.authenticationRequired, api.findByUser);
 }

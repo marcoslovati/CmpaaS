@@ -6,14 +6,6 @@ var schema = mongoose.Schema({
         required: true,
         unique: true
     },
-    description: {
-        type: String,
-        required: true
-    },
-    isPublic: {
-        type: Boolean,
-        default: true
-    },
     created: {
         type: Date,
         default: Date.now
