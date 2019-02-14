@@ -19,4 +19,12 @@ module.exports = app => {
     app
         .route('/v1/activities/user/:userId')
         .get(authApi.authenticationRequired, api.findByUser);
+
+    app
+        .route('/v1/activities/:activityId/include')
+        .put(authApi.authenticationRequired, api.include);
+    
+    app
+        .route('/v1/activities/:activityId/remove')
+        .put(authApi.authenticationRequired, api.remove);
 }

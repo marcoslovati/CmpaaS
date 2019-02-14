@@ -317,6 +317,14 @@ module.exports = app => {
                     devMessage: errorObject
                 };
                 break;
+            case 'activities-4':
+                error = {
+                    errorCode,
+                    moreInfo: app.get('activityApiErrorsRoute'),
+                    userMessage: 'Bad request: This resource expects an array of objects.',
+                    devMessage: 'The user not sent a array'
+                };
+                break;
             case 'mapContent-1':
                 error = {
                     errorCode,

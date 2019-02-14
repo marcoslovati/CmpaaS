@@ -3,7 +3,7 @@ module.exports = app => {
     const mongoose = require('mongoose');
     const api = {};
     const activityModel = mongoose.model('Activity');
-    const groupModel = mongoose.model('Grouṕ');
+    const groupModel = mongoose.model('Group');
     const errorParser = app.helpers.errorParser;
 
     api.create = (req, res) => {
@@ -63,7 +63,7 @@ module.exports = app => {
             });
     };
 
-    api.findByUserId = (req, res) => {
+    api.findByUser = (req, res) => {
         let dataAtual = new Date();
         dataAtual.setHours(0,0,0,0);
 
@@ -116,6 +116,69 @@ module.exports = app => {
                         else res.status(500).json(errorParser.parse('activities-3', error));
                 });
         }
+    };
+
+    api.include = (req, res) => {
+        var arr = req.body;
+        if(!Array.isArray(arr)) res.status(400).json(errorParser.parse('activities-4', {}))
+        else activityModel
+                .findById(req.params.activityId)
+                .then(activity => {
+                    if(!activity) res.status(404).json(errorParser.parse('activities-1', {}))
+                    else groupModel
+                            .find({ '_id': { $in: req.body } })
+                            .then(groups => {
+                                let list = groups.filter(group => {
+                                    return !(group.activities.some(a => a._id == activity._id.toString()));
+                                }).map(group => {
+                                    group.activities.push(activity);
+                                    group.save();
+                                    return group;
+                                });
+                                activity.groups = activity.groups.concat(list);
+                                activity.save();
+                                res.status(200).json({
+                                    userMessage: 'Groups successfully included to a activity .',
+                                    activity 
+                                });
+                            }, error => {
+                                if(error.name == "CastError") res.status(400).json(errorParser.parse('groups-5', error))
+                                else res.status(500).json(errorParser.parse('groups-1', error));
+                            });
+                }, error => {
+                    if(error.name == "CastError")res.status(400).json(errorParser.parse('activities-2', error))
+                    else res.status(500).json(errorParser.parse('activities-3', error));
+                });
+    };
+
+    api.remove = (req, res) => {
+        var arr = req.body;
+        if(!Array.isArray(arr)) res.status(400).json(errorParser.parse('activities-4', {}))
+        else activityModel
+                .findById(req.params.activityId)
+                .then(activity => {
+                    if(!activity) res.status(404).json(errorParser.parse('activities-1', {}))
+                    else groupModel
+                            .find({ '_id': { $in: req.body } })
+                            .then(groups => {
+                                groups.forEach(group => {
+                                    group.activities = group.activities.filter(a => a._id != activity._id.toString());
+                                    group.save();
+                                    activity.groups = activity.groups.filter(g => g._id != group._id.toString());
+                                    activity.save();
+                                });
+                                res.status(200).json({
+                                    userMessage: 'Groups successfully removed from a activity '+activity.name+ '.',
+                                    activity 
+                                })
+                            }, error => {
+                                if(error.name == "CastError") res.status(400).json(errorParser.parse('groups-5', error))
+                                else res.status(500).json(errorParser.parse('groups-1', error));
+                            });
+                }, error => {
+                    if(error.name == "CastError")res.status(400).json(errorParser.parse('activities-2', error))
+                    else res.status(500).json(errorParser.parse('activities-3', error));
+                });
     };
 
     return api;
