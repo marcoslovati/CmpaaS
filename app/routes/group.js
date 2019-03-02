@@ -15,6 +15,14 @@ module.exports = (app) => {
         .delete(authApi.authenticationRequired, api.removeById);
 
     app
+        .route('/v1/groups/filter/:filter')
+        .get(authApi.authenticationRequired, api.findByFilter);
+
+    app
+        .route('/v1/groups/activity/:activityId')
+        .get(authApi.authenticationRequired, api.findByActivity);         
+
+    app
         .route('/v1/groups/admin/:adminId')
         .get(authApi.authenticationRequired, api.findByAdmin);        
     
