@@ -29,7 +29,6 @@ module.exports = app => {
 
                     res.status(201).json({
                         userMessage: 'Activity created successfully. ',
-                        alertMessage,
                         activity 
                     });
                 }, error => {
@@ -89,7 +88,7 @@ module.exports = app => {
 
     api.findByCreator = (req, res) => {
         activityModel
-            .find({'creator._id': req.params.creatorId})
+            .find({'creator._id': req.auth.user._id})
             .then(activities => {
                 if(!activities) res.status(404).json(errorParser.parse('activities-1', {}));
                 else res.json(activities);
@@ -108,7 +107,6 @@ module.exports = app => {
                     if(!activity) res.status(404).json(errorParser.parse('activities-1', {}))
                     else res.json({
                             userMessage: 'The activity was updated successfully.',
-                            alertMessage,
                             activity
                         });
                 }, error => {
@@ -153,6 +151,7 @@ module.exports = app => {
 
     api.remove = (req, res) => {
         var arr = req.body;
+        console.log(arr);
         if(!Array.isArray(arr)) res.status(400).json(errorParser.parse('activities-4', {}))
         else activityModel
                 .findById(req.params.activityId)
