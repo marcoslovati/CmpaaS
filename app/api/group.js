@@ -6,6 +6,10 @@ module.exports = app => {
     const groupModel = mongoose.model('Group');
     const errorParser = app.helpers.errorParser;
 
+    let orderByName = function (a, b){
+        return a.name > b.name;
+    }
+
     api.create = (req, res) => {
         if(!(Object.prototype.toString.call(req.body) === '[object Object]')) res.status(400).json(errorParser.parse('groups-8', {}))
         else {
@@ -44,6 +48,18 @@ module.exports = app => {
                     else res.status(500).json(errorParser.parse('groups-3', error));
                 });
         }
+    };
+
+    api.findByFilter = (req, res) => {
+        groupModel
+            .find({name: new RegExp(req.params.filter, "i")})
+            .then(groups => {
+                if(!groups) res.status(404).json(errorParser.parse('groups-7', {}))
+                else res.json(groups);
+            }, error => {
+                if(error.name == "CastError") res.status(400).json(errorParser.parse('groups-5', error))
+                else res.status(500).json(errorParser.parse('groups-1', error)); 
+            });
     };
 
     api.list = (req, res) => {
@@ -99,6 +115,18 @@ module.exports = app => {
     api.notAllowed = (req, res) => {
         res.status(405).json(errorParser.parse('groups-7', {}));
     };
+
+    api.findByActivity = (req, res) => {
+        groupModel
+            .find({ "activities._id": req.params.activityId})
+            .then(groups => {
+                if(!groups) res.status(404).json(errorParser.parse('groups-7', {}))
+                else res.json(groups.sort(orderByName));
+            }, error => {
+                if(error.name == "CastError") res.status(400).json(errorParser.parse('groups-5', error))
+                else res.status(500).json(errorParser.parse('groups-1', error)); 
+            });
+    };     
 
     api.findById = (req, res) => {
         groupModel
