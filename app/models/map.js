@@ -5,15 +5,6 @@ var schema = mongoose.Schema({
         type: String,
         required: true
     },
-    description: {
-        type: String
-    },
-    question: {
-        type: String
-    },
-    keywords: [{
-        type: String
-    }],
     created: {
         type: Date,
         default: Date.now
@@ -60,21 +51,14 @@ var schema = mongoose.Schema({
             type: String
         }
     },
-    isPublic: {
-        type: Boolean,
-        default: true
-    },
     versions: [
         {
             _id: {
                 type: mongoose.Schema.Types.ObjectId, 
                 ref: 'MapContent'
             },
-            created: {
-                type: Date
-            },
-            content: {
-                type: mongoose.Schema.Types.Mixed
+            version: {
+                type: Number
             },
             link: {
                 rel: {
@@ -83,9 +67,6 @@ var schema = mongoose.Schema({
                 href: {
                     type: String
                 }
-            },
-            image: {
-                type: mongoose.Schema.Types.Mixed
             }
         }
     ]

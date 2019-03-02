@@ -22,6 +22,10 @@ var schema = mongoose.Schema({
     content: {
         type: mongoose.Schema.Types.Mixed
     },
+    version: {
+        type: Number,
+        default: 1
+    },
     link: {
         rel: {
             type: String
@@ -29,9 +33,6 @@ var schema = mongoose.Schema({
         href: {
             type: String
         }
-    },
-    image: {
-        type: mongoose.Schema.Types.Mixed
     }
 }, { usePushEach: true });
 

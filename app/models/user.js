@@ -18,10 +18,6 @@ var schema = mongoose.Schema({
         type: String,
         required: true
     },
-    company: {
-        type: String,
-        required: false
-    },
     email: {
         type: String,
         required: true,
@@ -93,30 +89,7 @@ var schema = mongoose.Schema({
                     type: String
                 }
             }
-    }],
-    profilePicture: {
-        type: String
-    },
-    facebookProvider: {
-        id: {
-            type: String,
-            select: false
-        },
-        access_token: {
-            type: String,
-            select: false
-        }
-    },
-    googleProvider: {
-        id: {
-            type: String,
-            select: false
-        },
-        id_token: {
-            type: String,
-            select: false
-        }
-    }
+    }]
 }, { usePushEach: true });
 
 schema.methods.comparePassword = function (password) {
