@@ -52,7 +52,7 @@ module.exports = app => {
 
     api.findByFilter = (req, res) => {
         groupModel
-            .find({name: new RegExp(req.params.filter, "i")})
+            .find({name: new RegExp(req.params.filter, "i"), active: true})
             .then(groups => {
                 if(!groups) res.status(404).json(errorParser.parse('groups-7', {}))
                 else res.json(groups);
