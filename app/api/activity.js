@@ -67,14 +67,17 @@ module.exports = app => {
         dataAtual.setHours(0,0,0,0);
 
         groupModel
-            .find({'users._id': req.auth.user._id})
+            .find({'users._id': req.params.userId, active: true})
             .then(groups =>{
+                var ObjectId = mongoose.Types.ObjectId;
+                let groupIds = groups.map(g => new ObjectId(g._id));
+
                 activityModel
                 .find({
                     active: true, 
-                    '$where': 'this.startDate.toJSON().slice(0, 10) <= ' + '"' + dataAtual + 
-                    '" && this.endDate.toJSON().slice(0, 10) >= ' + '"' + dataAtual + '"',
-                    'groups._id': { $in: groups._id }
+                    startDate: {$lt: dataAtual},
+                    endDate: {$gte: dataAtual},
+                    'groups._id': { $in: groupIds }
                 })
                 .then(activities => {
                     if(!activities) res.status(404).json(errorParser.parse('activities-1', {}))
